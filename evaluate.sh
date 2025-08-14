@@ -14,7 +14,7 @@ OPENAI_API_KEY="sk-proj-6U7_PWTfnuUHB7z_hJqxRAkxb2d3CIOyfs14LaBLNcNocgm3GOWuuzaE
 echo "Starting evaluation pipeline..."
 
 # Derive prediction output path
-PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}_predictions.json"
+PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}"
 
 # Ensure output directory exists
 mkdir -p "${OUTPUT_DIR}"

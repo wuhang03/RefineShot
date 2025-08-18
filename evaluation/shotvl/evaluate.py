@@ -110,6 +110,10 @@ def main():
     with torch.inference_mode():
         gen_model = accelerator.unwrap_model(model)
         for idx, row in iterable:
+            if row["category"] != "composition" : 
+                continue
+            print("row: ", row)
+            # quit()
             vision_msgs, prompt = build_prompt(row, root_dir, args.fps)
             chat = [
                 {"role": "system", "content": system_prompt},

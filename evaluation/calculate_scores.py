@@ -144,8 +144,11 @@ def main():
     total_cost = 0
     for _, row in tqdm(df.iterrows(), total=len(df)):
         if row["category"] != "composition":
-            continue
-        hit, letter, cost = eval_row(row, args.model)
+            hit = 0
+            letter = 'O'
+            cost = 0
+        else :
+            hit, letter, cost = eval_row(row, args.model)
         hits.append(hit)
         letters.append(letter)
         total_cost += cost

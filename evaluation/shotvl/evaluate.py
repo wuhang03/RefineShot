@@ -138,6 +138,8 @@ def main():
             trimmed = gen[0][inputs.input_ids.shape[-1]:]
             answer = processor.decode(trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False)
 
+            print("predicted answer: ", answer)
+
             local_df.at[idx, "prediction"] = answer
             logging.info(answer)
 

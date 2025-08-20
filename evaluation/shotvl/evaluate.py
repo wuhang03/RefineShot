@@ -29,10 +29,18 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
     q = row["question"]
     options: dict[str, str] = safe_load(row["options"])
     opts_block = "Options:\n" + "\n".join(f"{k}. {v}" for k, v in options.items())
+    # prompt = (
+    #     f"Question: {q}\n{opts_block}\n"
+    #     "Please select the most likely answer from the options above."
+    # )
     prompt = (
         f"Question: {q}\n{opts_block}\n"
-        "Please select the most likely answer from the options above."
+        "Step 1: Carefully analyze the differences between the given options.\n"
+        "Step 2: Based on these differences, interpret the movie shot and perform reasoning to decide which option best fits.\n"
+        "Step 3: Ensure that the final answer is fully consistent with the reasoning process.\n"
+        "Please provide your reasoning process first, then clearly state the final Answer."
     )
+
 
     types = safe_load(row["type"])
     paths = safe_load(row["path"])

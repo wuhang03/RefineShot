@@ -29,17 +29,57 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
     q = row["question"]
     options: dict[str, str] = safe_load(row["options"])
     opts_block = "Options:\n" + "\n".join(f"{k}. {v}" for k, v in options.items())
-    # prompt = (
-    #     f"Question: {q}\n{opts_block}\n"
-    #     "Please select the most likely answer from the options above."
-    # )
     prompt = (
         f"Question: {q}\n{opts_block}\n"
-        "Step 1: Carefully analyze the differences between the given options.\n"
-        "Step 2: Based on these differences, interpret the movie shot and perform reasoning to decide which option best fits.\n"
-        "Step 3: Ensure that the final answer is fully consistent with the reasoning process.\n"
-        "Please provide your reasoning process first, then clearly state the final Answer."
+        "Please select the most likely answer from the options above."
+        "At the end of <think>, clearly state: 'Therefore, the correct answer is X.'\n"
+        "Then in <answer>, repeat exactly that X."
     )
+
+    prompt = (
+        f"Question: {q}\n{opts_block}\n"
+        "Please answer in the following format, and output each section only ONCE:\n"
+        "<think>\n"
+        "[Step-by-step reasoning here. At the end, clearly state: 'Therefore, the correct answer is X.' "
+        "You must use the same X in the <answer> section.]\n"
+        "</think>\n"
+        "<answer>\n"
+        "X  # The answer here must exactly match the option stated in <think>.\n"
+        "</answer>\n"
+        "Do not output more than one <think> or <answer> block for this question. "
+        "If the answers in <think> and <answer> do not match, your response will be considered incorrect."
+    )
+
+    # prompt = (
+    #     f"Question: {q}\n{opts_block}\n"
+    #     "Step 1: Provide a definition or explanation for each option above.\n"
+    #     "Step 2: Summarize the key differences among the options and describe how to judge between them.\n"
+    #     "Step 3: Analyze the given image based on these differences.\n"
+    #     "Step 4: Select the most likely answer from the options, ensuring it is consistent with the reasoning process."
+    #     "At the end of <think>, clearly state: 'Therefore, the correct answer is X.'\n"
+    #     "Then in <answer>, repeat exactly that X."
+    # )
+
+
+    # prompt = (
+    #     f"Question: {q}\n{opts_block}\n"
+    #     "Please think step by step and provide your reasoning and answer "
+    #     "in the following format:\n"
+    #     "<think>\n"
+    #     "Definitions:\n"
+    #     "- Option A: ...\n"
+    #     "- Option B: ...\n"
+    #     "...\n"
+    #     "Comparison:\n"
+    #     "... (differences)\n"
+    #     "Reasoning:\n"
+    #     "... (how the shot matches a specific option)\n"
+    #     "</think>\n"
+    #     "<answer>\n"
+    #     "Final Answer: <the chosen option>\n"
+    #     "</answer>\n"
+    #     "Do not repeat the same content or output multiple <think> sections for one question."
+    # )
 
 
     types = safe_load(row["type"])
@@ -123,12 +163,24 @@ def main():
             print("row: ", row)
             # quit()
             vision_msgs, prompt = build_prompt(row, root_dir, args.fps)
+            print("vision_msgs: ", vision_msgs)
+            print("prompt: ", prompt)
+
             chat = [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": vision_msgs + [{"type": "text", "text": prompt}]},
             ]
             text_in = processor.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
             img_in, vid_in = process_vision_info(chat)
+
+            # chat = [
+            #     {"role": "system", "content": system_prompt},
+            #     {"role": "user", "content": prompt},
+            # ]
+            # text_in = processor.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
+            # img_in, vid_in = process_vision_info(vision_msgs)
+
+
             inputs = processor(
                 text=[text_in],
                 images=img_in,
@@ -146,6 +198,7 @@ def main():
             trimmed = gen[0][inputs.input_ids.shape[-1]:]
             answer = processor.decode(trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False)
 
+            print("-----------------------------------------------------------")
             print("predicted answer: ", answer)
 
             local_df.at[idx, "prediction"] = answer

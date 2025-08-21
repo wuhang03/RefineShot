@@ -125,6 +125,20 @@ def load_df(path: str) -> pd.DataFrame:
         return pd.read_csv(path, sep="\t")
     return pd.read_excel(path, sheet_name=0)
 
+# def read_input(p: str):
+#     pth = Path(p)
+#     if pth.is_file():
+#         return load_df(str(pth)), str(pth)
+#     elif pth.is_dir():
+#         frames = []
+#         for fn in pth.iterdir():
+#             if fn.suffix.lower() in (".xlsx", ".xls", ".tsv"):
+#                 frames.append(load_df(str(fn)))
+#         if not frames:
+#             raise ValueError("Prediction File Not Found!")
+#         return pd.concat(frames, ignore_index=True), str(pth / "merged_eval.xlsx")
+#     raise FileNotFoundError(p)
+
 def read_input(p: str):
     pth = Path(p)
     if pth.is_file():
@@ -136,7 +150,9 @@ def read_input(p: str):
                 frames.append(load_df(str(fn)))
         if not frames:
             raise ValueError("Prediction File Not Found!")
-        return pd.concat(frames, ignore_index=True), str(pth / "merged_eval.xlsx")
+        now_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_name = f"merged_eval_{now_str}.xlsx"
+        return pd.concat(frames, ignore_index=True), str(pth / out_name)
     raise FileNotFoundError(p)
 
 def main():

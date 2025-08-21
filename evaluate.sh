@@ -4,7 +4,7 @@
 set -e
 
 # =================== Configuration Variables ===================
-MODEL_NAME="ShotVL-3B"
+MODEL_NAME="Qwen2.5-VL-7B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
@@ -22,12 +22,12 @@ PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}"
 mkdir -p "${OUTPUT_DIR}"
 
 echo "Step 1: Running model evaluation with Accelerate"
-accelerate launch --num_processes ${NUM_GPUS} evaluation/shotvl/evaluate.py --model ${MODEL_NAME} --reasoning --output-dir ${OUTPUT_DIR} --category ${CATEGORY}
+accelerate launch --num_processes ${NUM_GPUS} evaluation/shotvl/evaluate_qwen.py --model ${MODEL_NAME} --reasoning --output-dir ${OUTPUT_DIR} --category "${CATEGORY}"
 
 echo "Model evaluation completed. Predictions saved to: ${PREDICTION_PATH}"
 
 echo "Step 2: Calculating scores using OpenAI API"
-OPENAI_API_KEY=${OPENAI_API_KEY} python evaluation/calculate_scores.py --prediction_path ${PREDICTION_PATH} --category ${CATEGORY}
+OPENAI_API_KEY=${OPENAI_API_KEY} python evaluation/calculate_scores.py --prediction_path ${PREDICTION_PATH} --category "${CATEGORY}"
 
 echo "Score calculation completed."
 echo "All steps finished successfully."

@@ -106,6 +106,7 @@ def parse_args():
     p.add_argument("--reasoning", action="store_true")
     p.add_argument("--max-new-tokens", type=int, default=1024)
     p.add_argument("--output-dir", default="eval_results")
+    p.add_argument("--category", default="composition")
     return p.parse_args()
 
 
@@ -156,7 +157,7 @@ def main():
     with torch.inference_mode():
         gen_model = accelerator.unwrap_model(model)
         for idx, row in iterable:
-            if row["category"] != "composition" : 
+            if row["category"] != args.category: 
                 continue
             print("row: ", row)
             # quit()

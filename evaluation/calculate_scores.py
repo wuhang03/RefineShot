@@ -10,6 +10,7 @@ parser.add_argument("--prediction_path", required=True)
 parser.add_argument("--openai_key", default=os.getenv("OPENAI_API_KEY"))
 parser.add_argument("--model", default="gpt-4o-2024-08-06")
 parser.add_argument("--temperature", type=float, default=0.0)
+parser.add_argument("--category", default="composition")
 args = parser.parse_args()
 PRED_PATH = os.path.abspath(args.prediction_path)
 
@@ -143,7 +144,7 @@ def main():
     hits, letters = [], []
     total_cost = 0
     for _, row in tqdm(df.iterrows(), total=len(df)):
-        if row["category"] != "composition":
+        if row["category"] != args.category:
             hit = 0
             letter = 'O'
             cost = 0

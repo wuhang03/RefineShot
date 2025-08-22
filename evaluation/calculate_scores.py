@@ -105,22 +105,33 @@ def eval_row(row, gpt_model):
     choices = build_choices(row)
     opts_str = "\n".join(f"{k}. {v}" for k, v in choices.items())
     cost = 0
-    # print(row["prediction"])
+
+    print("\n\n=== Predicted Answer ===")
+    print(row["prediction"])
     pred_letter = can_infer(row["prediction"], choices)
-    print("pred_letter: ", pred_letter)
-    if not pred_letter and gpt_model:
-        prompt = build_prompt(row["question"], opts_str, row["prediction"])
-        for _ in range(3):
-            ans, cost = openai_generate(prompt, gpt_model, temperature=args.temperature)
-            print("ans: ", ans)
-            print("cost: ", cost)
-            pred_letter = can_infer(ans, choices)
-            if pred_letter:
-                break
-        if not pred_letter:
-            pred_letter = random.choice(list(choices) + ["Z"])
-    else:
-        pred_letter = "Z"
+    print("=== End ===\n\n")
+
+    print("\n\n=== Predicted Letter ===")
+    print(pred_letter)
+    print("=== End ===\n\n")
+    # if not pred_letter and gpt_model:
+    #     prompt = build_prompt(row["question"], opts_str, row["prediction"])
+    #     for _ in range(3):
+    #         ans, cost = openai_generate(prompt, gpt_model, temperature=args.temperature)
+    #         print("ans: ", ans)
+    #         print("cost: ", cost)
+    #         pred_letter = can_infer(ans, choices)
+    #         if pred_letter:
+    #             break
+    #     if not pred_letter:
+    #         pred_letter = random.choice(list(choices) + ["Z"])
+    # else:
+    #     pred_letter = "Z"
+
+    if not pred_letter:
+        pred_letter = 'Z'
+
+    
     hit = int(pred_letter == row["answer"])
     return hit, pred_letter or "Z", cost
 

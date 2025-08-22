@@ -4,6 +4,7 @@ import copy as cp
 import pandas as pd
 from tqdm import tqdm
 from openai import OpenAI
+import datetime  
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--prediction_path", required=True)
@@ -104,7 +105,9 @@ def eval_row(row, gpt_model):
     choices = build_choices(row)
     opts_str = "\n".join(f"{k}. {v}" for k, v in choices.items())
     cost = 0
+    # print(row["prediction"])
     pred_letter = can_infer(row["prediction"], choices)
+    print("pred_letter: ", pred_letter)
     if not pred_letter and gpt_model:
         prompt = build_prompt(row["question"], opts_str, row["prediction"])
         for _ in range(3):
@@ -116,7 +119,8 @@ def eval_row(row, gpt_model):
                 break
         if not pred_letter:
             pred_letter = random.choice(list(choices) + ["Z"])
-
+    else:
+        pred_letter = "Z"
     hit = int(pred_letter == row["answer"])
     return hit, pred_letter or "Z", cost
 

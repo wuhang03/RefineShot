@@ -186,6 +186,7 @@ def main():
         gen_model = accelerator.unwrap_model(model)
         for idx, row in iterable:
             if row["category"] != args.category: 
+                local_df.at[idx, "prediction"] = "Z"
                 continue
             print("row: ", row)
             vision_msgs, prompt = build_prompt(row, root_dir, args.fps)
@@ -218,7 +219,8 @@ def main():
             answer = processor.decode(trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False)
 
             print("\n\n=== Predicted Answer ===")
-            print( answer)
+            print(answer)
+            print("=== End ===\n\n")
 
             local_df.at[idx, "prediction"] = answer
             logging.info(answer)

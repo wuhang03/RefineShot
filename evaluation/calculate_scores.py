@@ -108,10 +108,12 @@ def eval_row(row, gpt_model):
 
     print("\n\n=== Predicted Answer ===")
     print(row["prediction"])
-    pred_letter = can_infer(row["prediction"], choices)
-    print("=== End ===\n\n")
+    if pd.isna(row["prediction"]) or str(row["prediction"]).lower() == "nan":
+        row["prediction"] = "Z"
 
-    print("\n\n=== Predicted Letter ===")
+    pred_letter = can_infer(row["prediction"], choices)
+
+    print("\n=== Predicted Letter ===")
     print(pred_letter)
     print("=== End ===\n\n")
     # if not pred_letter and gpt_model:
@@ -175,12 +177,12 @@ def main():
     hits, letters = [], []
     total_cost = 0
     for _, row in tqdm(df.iterrows(), total=len(df)):
-        if row["category"] != args.category:
-            hit = 0
-            letter = 'O'
-            cost = 0
-        else :
-            hit, letter, cost = eval_row(row, args.model)
+        # if row["category"] != args.category:
+        #     hit = 0
+        #     letter = 'Z'
+        #     cost = 0
+        # else :
+        hit, letter, cost = eval_row(row, args.model)
         hits.append(hit)
         letters.append(letter)
         total_cost += cost
@@ -199,7 +201,8 @@ def main():
     })
     acc_df = pd.concat([grp, overall], ignore_index=True)
     print(acc_df)
-
+    
+    out_path = out_path.replace('.xlsx', '_results.xlsx')
     with pd.ExcelWriter(out_path, engine="openpyxl", mode="w") as w:
         df.to_excel(w, index=False, sheet_name="Results")
         acc_df.to_excel(w, index=False, sheet_name="Accuracy")

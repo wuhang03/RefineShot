@@ -4,7 +4,7 @@
 set -e
 
 # =================== Configuration Variables ===================
-MODEL_NAME="InternVL3-2B"
+MODEL_NAME="InternVL3-8B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 

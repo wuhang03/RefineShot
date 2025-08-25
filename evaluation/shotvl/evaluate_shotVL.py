@@ -184,8 +184,8 @@ def main():
     with torch.inference_mode():
         gen_model = accelerator.unwrap_model(model)
         for idx, row in iterable:
-            if row["category"] != args.category: 
-                continue
+            # if row["category"] != args.category: 
+            #     continue
             print("row: ", row)
             # quit()
             vision_msgs, prompt = build_prompt(row, root_dir, args.fps)
@@ -198,13 +198,6 @@ def main():
             ]
             text_in = processor.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
             img_in, vid_in = process_vision_info(chat)
-
-            # chat = [
-            #     {"role": "system", "content": system_prompt},
-            #     {"role": "user", "content": prompt},
-            # ]
-            # text_in = processor.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
-            # img_in, vid_in = process_vision_info(vision_msgs)
 
 
             inputs = processor(
@@ -224,8 +217,10 @@ def main():
             trimmed = gen[0][inputs.input_ids.shape[-1]:]
             answer = processor.decode(trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False)
 
-            print("-----------------------------------------------------------")
-            print("predicted answer: ", answer)
+            print("\n\n=== Predicted Answer ===")
+            print(answer)
+            print("=== End ===\n\n")
+
 
             local_df.at[idx, "prediction"] = answer
             logging.info(answer)

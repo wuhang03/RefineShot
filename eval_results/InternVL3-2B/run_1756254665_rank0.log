@@ -1,0 +1,136 @@
+2025-08-27 00:31:05,242 - INFO - Loading InternVL from OpenGVLab/InternVL3-2B using lmdeploy...
+2025-08-27 00:31:25,218 - INFO - vision_select_layer: -1
+2025-08-27 00:31:25,219 - INFO - ps_version: v2
+2025-08-27 00:31:25,219 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:25,219 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:25,219 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:25,219 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:25,220 - INFO - vision_select_layer: -1
+2025-08-27 00:31:25,220 - INFO - ps_version: v1
+2025-08-27 00:31:25,220 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:25,220 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:26,455 - INFO - vision_select_layer: -1
+2025-08-27 00:31:26,455 - INFO - ps_version: v2
+2025-08-27 00:31:26,455 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:26,455 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:26,456 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:26,456 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:26,456 - INFO - vision_select_layer: -1
+2025-08-27 00:31:26,456 - INFO - ps_version: v1
+2025-08-27 00:31:26,456 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:26,456 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:26,460 - INFO - vision_select_layer: -1
+2025-08-27 00:31:26,460 - INFO - ps_version: v2
+2025-08-27 00:31:26,460 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:26,460 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:26,461 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:26,461 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:26,461 - INFO - vision_select_layer: -1
+2025-08-27 00:31:26,461 - INFO - ps_version: v1
+2025-08-27 00:31:26,461 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:26,461 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:26,753 - INFO - vision_select_layer: -1
+2025-08-27 00:31:26,753 - INFO - ps_version: v2
+2025-08-27 00:31:26,753 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:26,753 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:26,754 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:26,754 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:26,754 - INFO - vision_select_layer: -1
+2025-08-27 00:31:26,754 - INFO - ps_version: v1
+2025-08-27 00:31:26,754 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:26,754 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:27,679 - INFO - num_image_token: 256
+2025-08-27 00:31:27,679 - INFO - ps_version: v2
+2025-08-27 00:31:29,294 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,294 - INFO - ps_version: v2
+2025-08-27 00:31:29,294 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,294 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:29,295 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:29,295 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:29,295 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,295 - INFO - ps_version: v1
+2025-08-27 00:31:29,295 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,295 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:29,499 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,499 - INFO - ps_version: v2
+2025-08-27 00:31:29,499 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,499 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:29,500 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:29,500 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:29,500 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,500 - INFO - ps_version: v1
+2025-08-27 00:31:29,500 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,500 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:29,504 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,504 - INFO - ps_version: v2
+2025-08-27 00:31:29,504 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,504 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:29,504 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:29,504 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:29,505 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,505 - INFO - ps_version: v1
+2025-08-27 00:31:29,505 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,505 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:29,580 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,580 - INFO - ps_version: v2
+2025-08-27 00:31:29,580 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,580 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:29,580 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:29,580 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:29,581 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,581 - INFO - ps_version: v1
+2025-08-27 00:31:29,581 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,581 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:29,585 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,585 - INFO - ps_version: v2
+2025-08-27 00:31:29,585 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,585 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:29,585 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:29,585 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:29,585 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,585 - INFO - ps_version: v1
+2025-08-27 00:31:29,585 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,585 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:29,589 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,589 - INFO - ps_version: v2
+2025-08-27 00:31:29,589 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,589 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:29,589 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:29,589 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:29,590 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,590 - INFO - ps_version: v1
+2025-08-27 00:31:29,590 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,590 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:29,594 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,594 - INFO - ps_version: v2
+2025-08-27 00:31:29,594 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,594 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:29,594 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:29,594 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:29,594 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,594 - INFO - ps_version: v1
+2025-08-27 00:31:29,594 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,595 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:29,598 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,598 - INFO - ps_version: v2
+2025-08-27 00:31:29,598 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,598 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:29,598 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:29,598 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:29,598 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,598 - INFO - ps_version: v1
+2025-08-27 00:31:29,598 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,598 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:29,602 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,603 - INFO - ps_version: v2
+2025-08-27 00:31:29,603 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,603 - INFO - max_dynamic_patch: 12
+2025-08-27 00:31:29,603 - INFO - vision_config is None. Initializing the InternVisionConfig with default values.
+2025-08-27 00:31:29,603 - INFO - llm_config is None. Initializing the LlamaConfig config with default values (`LlamaConfig`).
+2025-08-27 00:31:29,603 - INFO - vision_select_layer: -1
+2025-08-27 00:31:29,603 - INFO - ps_version: v1
+2025-08-27 00:31:29,603 - INFO - min_dynamic_patch: 1
+2025-08-27 00:31:29,603 - INFO - max_dynamic_patch: 6
+2025-08-27 00:31:31,427 - INFO - Rank 0/1: Processing 3572 samples
+2025-08-27 00:31:32,038 - INFO - Saved predictions to eval_results/InternVL3-2B/rank_0_predictions.xlsx
+2025-08-27 00:31:32,851 - INFO - Merged results saved to eval_results/InternVL3-2B/predictions_merged.xlsx

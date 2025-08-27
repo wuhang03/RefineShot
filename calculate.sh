@@ -4,9 +4,9 @@ MODEL_NAME="Qwen2.5-VL-3B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
-CATEGORY="camera movement"
+CATEGORY="all"
 
-FILENAME="predictions_1756247320.xlsx"
+FILENAME="predictions_1756311082.xlsx"
 
 # PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}/${FILENAME}"
 

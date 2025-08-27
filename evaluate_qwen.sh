@@ -8,7 +8,7 @@ MODEL_NAME="Qwen2.5-VL-3B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
-CATEGORY="camera movement"
+CATEGORY="all"
 
 PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}"
 

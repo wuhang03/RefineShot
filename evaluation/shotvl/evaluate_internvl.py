@@ -129,6 +129,140 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
             raise ValueError(f"Unsupported modality type: {t}")
     return msgs, prompt
 
+import numpy as np
+import torch
+import torchvision.transforms as T
+from decord import VideoReader, cpu
+from PIL import Image
+from torchvision.transforms.functional import InterpolationMode
+from transformers import AutoModel, AutoTokenizer
+
+IMAGENET_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_STD = (0.229, 0.224, 0.225)
+
+def build_transform(input_size):
+    MEAN, STD = IMAGENET_MEAN, IMAGENET_STD
+    transform = T.Compose([
+        T.Lambda(lambda img: img.convert('RGB') if img.mode != 'RGB' else img),
+        T.Resize((input_size, input_size), interpolation=InterpolationMode.BICUBIC),
+        T.ToTensor(),
+        T.Normalize(mean=MEAN, std=STD)
+    ])
+    return transform
+
+def find_closest_aspect_ratio(aspect_ratio, target_ratios, width, height, image_size):
+    best_ratio_diff = float('inf')
+    best_ratio = (1, 1)
+    area = width * height
+    for ratio in target_ratios:
+        target_aspect_ratio = ratio[0] / ratio[1]
+        ratio_diff = abs(aspect_ratio - target_aspect_ratio)
+        if ratio_diff < best_ratio_diff:
+            best_ratio_diff = ratio_diff
+            best_ratio = ratio
+        elif ratio_diff == best_ratio_diff:
+            if area > 0.5 * image_size * image_size * ratio[0] * ratio[1]:
+                best_ratio = ratio
+    return best_ratio
+
+def dynamic_preprocess(image, min_num=1, max_num=12, image_size=448, use_thumbnail=False):
+    orig_width, orig_height = image.size
+    aspect_ratio = orig_width / orig_height
+
+    # calculate the existing image aspect ratio
+    target_ratios = set(
+        (i, j) for n in range(min_num, max_num + 1) for i in range(1, n + 1) for j in range(1, n + 1) if
+        i * j <= max_num and i * j >= min_num)
+    target_ratios = sorted(target_ratios, key=lambda x: x[0] * x[1])
+
+    # find the closest aspect ratio to the target
+    target_aspect_ratio = find_closest_aspect_ratio(
+        aspect_ratio, target_ratios, orig_width, orig_height, image_size)
+
+    # calculate the target width and height
+    target_width = image_size * target_aspect_ratio[0]
+    target_height = image_size * target_aspect_ratio[1]
+    blocks = target_aspect_ratio[0] * target_aspect_ratio[1]
+
+    # resize the image
+    resized_img = image.resize((target_width, target_height))
+    processed_images = []
+    for i in range(blocks):
+        box = (
+            (i % (target_width // image_size)) * image_size,
+            (i // (target_width // image_size)) * image_size,
+            ((i % (target_width // image_size)) + 1) * image_size,
+            ((i // (target_width // image_size)) + 1) * image_size
+        )
+        # split the image
+        split_img = resized_img.crop(box)
+        processed_images.append(split_img)
+    assert len(processed_images) == blocks
+    if use_thumbnail and len(processed_images) != 1:
+        thumbnail_img = image.resize((image_size, image_size))
+        processed_images.append(thumbnail_img)
+    return processed_images
+
+def load_image(image_file, input_size=448, max_num=12):
+    image = Image.open(image_file).convert('RGB')
+    transform = build_transform(input_size=input_size)
+    images = dynamic_preprocess(image, image_size=input_size, use_thumbnail=True, max_num=max_num)
+    pixel_values = [transform(image) for image in images]
+    pixel_values = torch.stack(pixel_values)
+    return pixel_values
+
+# If you have an 80G A100 GPU, you can put the entire model on a single GPU.
+# Otherwise, you need to load a model using multiple GPUs, please refer to the `Multiple GPUs` section.
+path = 'OpenGVLab/InternVL2_5-8B'
+
+# video multi-round conversation (视频多轮对话)
+def get_index(bound, fps, max_frame, first_idx=0, num_segments=32):
+    if bound:
+        start, end = bound[0], bound[1]
+    else:
+        start, end = -100000, 100000
+    start_idx = max(first_idx, round(start * fps))
+    end_idx = min(round(end * fps), max_frame)
+    seg_size = float(end_idx - start_idx) / num_segments
+    frame_indices = np.array([
+        int(start_idx + (seg_size / 2) + np.round(seg_size * idx))
+        for idx in range(num_segments)
+    ])
+    return frame_indices
+
+def load_video(video_path, bound=None, input_size=448, max_num=1, num_segments=32):
+    vr = VideoReader(video_path, ctx=cpu(0), num_threads=1)
+    max_frame = len(vr) - 1
+    fps = float(vr.get_avg_fps())
+
+    pixel_values_list, num_patches_list = [], []
+    transform = build_transform(input_size=input_size)
+    frame_indices = get_index(bound, fps, max_frame, first_idx=0, num_segments=num_segments)
+    for frame_index in frame_indices:
+        img = Image.fromarray(vr[frame_index].asnumpy()).convert('RGB')
+        img = dynamic_preprocess(img, image_size=input_size, use_thumbnail=True, max_num=max_num)
+        pixel_values = [transform(tile) for tile in img]
+        pixel_values = torch.stack(pixel_values)
+        num_patches_list.append(pixel_values.shape[0])
+        pixel_values_list.append(pixel_values)
+    pixel_values = torch.cat(pixel_values_list)
+    return pixel_values, num_patches_list
+
+# video_path = './examples/red-panda.mp4'
+# pixel_values, num_patches_list = load_video(video_path, num_segments=8, max_num=1)
+# pixel_values = pixel_values.to(torch.bfloat16).cuda()
+# video_prefix = ''.join([f'Frame-{i+1}: <image>\n' for i in range(len(num_patches_list))])
+# question = video_prefix + 'What is the red panda doing?'
+# # Frame1: <image>\nFrame2: <image>\n...\nFrame8: <image>\n{question}
+# response, history = model.chat(tokenizer, pixel_values, question, generation_config,
+#                                num_patches_list=num_patches_list, history=None, return_history=True)
+# print(f'User: {question}\nAssistant: {response}')
+
+# question = 'Describe this video in detail.'
+# response, history = model.chat(tokenizer, pixel_values, question, generation_config,
+#                                num_patches_list=num_patches_list, history=history, return_history=True)
+# print(f'User: {question}\nAssistant: {response}')
+
 
 def parse_args():
     p = argparse.ArgumentParser(description="Evaluate InternVL on ShotBench (multi-GPU)")
@@ -144,12 +278,12 @@ def parse_args():
     p.add_argument("--session-len", type=int, default=16384, help="Session length")
     return p.parse_args()
 
-
 def main():
     args = parse_args()
     accelerator = Accelerator()
     
     repo_id = HF_MODELS[args.model]
+    print("repo_id: ", repo_id)
     root_dir = Path(args.root_dir) if args.root_dir else Path(args.data_file).parent
 
     # 设置输出目录和日志
@@ -170,17 +304,27 @@ def main():
     logging.info(f"Loading InternVL from {repo_id} using lmdeploy...")
     
     # 使用 lmdeploy 初始化管道
-    backend_config = TurbomindEngineConfig(
-        session_len=args.session_len,
-        tp=args.tp
-    )
-    chat_template_config = ChatTemplateConfig(model_name='internvl2_5')
+    # backend_config = TurbomindEngineConfig(
+    #     session_len=args.session_len,
+    #     tp=args.tp
+    # )
+    # chat_template_config = ChatTemplateConfig(model_name='internvl2_5')
     
-    pipe = pipeline(
-        repo_id,
-        backend_config=backend_config,
-        chat_template_config=chat_template_config
-    )
+    # pipe = pipeline(
+    #     repo_id,
+    #     backend_config=backend_config,
+    #     chat_template_config=chat_template_config
+    # )
+    model = AutoModel.from_pretrained(
+    repo_id,
+    torch_dtype=torch.bfloat16,
+    low_cpu_mem_usage=True,
+    trust_remote_code=True).eval().cuda()
+    tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=True, use_fast=False)
+
+    # set the max number of tiles in `max_num`
+    # pixel_values = load_image('./examples/image1.jpg', max_num=12).to(torch.bfloat16).cuda()
+    generation_config = dict(max_new_tokens=1024, do_sample=False)
 
     full_df = pd.read_csv(args.data_file, sep="\t")
     local_df = full_df.iloc[rank::world_size].reset_index(drop=True)
@@ -200,44 +344,136 @@ def main():
             # logging.info(f"Processing row {idx}")
             print("vision_msgs: ", vision_msgs)
             print("prompt: ", prompt)
-            
-            # 处理图像输入
-            images = []
-            for msg in vision_msgs:
-                if msg["type"] == "image":
-                    img_path = msg["image"]
-                    # 检查文件是否存在
-                    if not Path(img_path).exists():
-                        accelerator.print(f"Warning: Image file not found: {img_path}")
-                        logging.warning(f"Image file not found: {img_path}")
-                        continue
-                    
-                    # 使用 lmdeploy 的 load_image 加载图像
-                    image = load_image(img_path)
-                    images.append(image)
-            
-            # 使用 lmdeploy 管道进行推理
-            if images:
-                # 对于单张图片
-                if len(images) == 1:
-                    gen_config = {
-                        'max_new_tokens': args.max_new_tokens,
-                        'temperature': 0.0,
-                        'do_sample': False
-                    }
 
-                    response = pipe((prompt, images[0]), **gen_config)
-                else:
-                    # 对于多张图片，可能需要调整prompt格式
-                    response = pipe((prompt, images), **gen_config)
+            # video_path = './examples/red-panda.mp4'
+            video_path = vision_msgs[0]['video']
+            print("video_path: ", video_path)
+            pixel_values, num_patches_list = load_video(video_path, num_segments=8, max_num=1)
+            pixel_values = pixel_values.to(torch.bfloat16).cuda()
+            video_prefix = ''.join([f'Frame-{i+1}: <image>\n' for i in range(len(num_patches_list))])
+            # question = video_prefix + 'What is the red panda doing?'
+            question = video_prefix + prompt
+            print("question: ", question)
+            # Frame1: <image>\nFrame2: <image>\n...\nFrame8: <image>\n{question}
+            response, history = model.chat(tokenizer, pixel_values, question, generation_config,
+                                        num_patches_list=num_patches_list, history=None, return_history=True)
+            # print(f'User: {question}\nAssistant: {response}')
+            print("\n\n=== Predicted Answer ===")
+            print(response)
+            print("=== End ===\n\n")
+
+            # question = 'Describe this video in detail.'
+            # response, history = model.chat(tokenizer, pixel_values, question, generation_config,
+            #                             num_patches_list=num_patches_list, history=history, return_history=True)
+            # print(f'User: {question}\nAssistant: {response}')
+            
+            # # 处理图像输入
+            # images = []
+            # for msg in vision_msgs:
+            #     if msg["type"] == "image":
+            #         img_path = msg["image"]
+            #         # 检查文件是否存在
+            #         if not Path(img_path).exists():
+            #             accelerator.print(f"Warning: Image file not found: {img_path}")
+            #             logging.warning(f"Image file not found: {img_path}")
+            #             continue
+                    
+            #         # 使用 lmdeploy 的 load_image 加载图像
+            #         image = load_image(img_path)
+            #         images.append(image)
+            
+            # # 使用 lmdeploy 管道进行推理
+            # if images:
+            #     # 对于单张图片
+            #     if len(images) == 1:
+            #         gen_config = {
+            #             'max_new_tokens': args.max_new_tokens,
+            #             'temperature': 0.0,
+            #             'do_sample': False
+            #         }
+
+            #         response = pipe((prompt, images[0]), **gen_config)
+            #     else:
+            #         # 对于多张图片，可能需要调整prompt格式
+            #         response = pipe((prompt, images), **gen_config)
                 
-                prediction = response.text if hasattr(response, 'text') else str(response)
-                local_df.at[idx, "prediction"] = prediction
-                accelerator.print(f"Row {idx}: {prediction}")
-                logging.info(f"Row {idx} completed: {prediction}")  # 完整记录
-                                print("\n\n=== Predicted Answer ===")
-                print(prediction)
-                print("=== End ===\n\n")
+            #     prediction = response.text if hasattr(response, 'text') else str(response)
+            #     local_df.at[idx, "prediction"] = prediction
+            #     accelerator.print(f"Row {idx}: {prediction}")
+            #     logging.info(f"Row {idx} completed: {prediction}")  # 完整记录
+            #                     print("\n\n=== Predicted Answer ===")
+            #     print(prediction)
+            #     print("=== End ===\n\n")
+            # 在推理循环内替换图片处理部分
+            # images = []
+            # pixel_values = None
+            # num_patches_list = None
+            # video_prompt = ""
+
+
+
+            # for msg in vision_msgs:
+            #     if msg["type"] == "image":
+            #         img_path = msg["image"]
+            #         if not Path(img_path).exists():
+            #             accelerator.print(f"Warning: Image file not found: {img_path}")
+            #             logging.warning(f"Image file not found: {img_path}")
+            #             continue
+            #         image = load_image(img_path)
+            #         images.append(image)
+            #     elif msg["type"] == "video":
+            #         vid_path = msg["video"]
+            #         if not Path(vid_path).exists():
+            #             accelerator.print(f"Warning: Video file not found: {vid_path}")
+            #             logging.warning(f"Video file not found: {vid_path}")
+            #             continue
+            #         # 加载视频帧
+            #         pixel_values, num_patches_list = load_video(
+            #             vid_path, num_segments=8, max_num=1
+            #         )
+            #         pixel_values = pixel_values.to(torch.bfloat16).cuda()
+            #         # 构建视频帧的 prompt 前缀
+            #         video_prompt = ''.join([f'Frame-{i+1}: <image>\n' for i in range(len(num_patches_list))])
+
+            # # 推理
+            # if pixel_values is not None:
+            #     # 视频输入
+            #     full_prompt = video_prompt + prompt
+            #     gen_config = {
+            #         'max_new_tokens': args.max_new_tokens,
+            #         'temperature': 0.0,
+            #         'do_sample': False
+            #     }
+            #     # 假设 pipe 支持 model.chat 方式
+            #     response = pipe.model.chat(
+            #         pipe.tokenizer, pixel_values, full_prompt, gen_config,
+            #         num_patches_list=num_patches_list, history=None, return_history=False
+            #     )
+            #     prediction = response if isinstance(response, str) else getattr(response, 'text', str(response))
+            #     local_df.at[idx, "prediction"] = prediction
+            #     accelerator.print(f"Row {idx}: {prediction}")
+            #     logging.info(f"Row {idx} completed: {prediction}")
+            #     print("\n\n=== Predicted Answer ===")
+            #     print(prediction)
+            #     print("=== End ===\n\n")
+            # elif images:
+            #     # 图片输入（原有逻辑）
+            #     gen_config = {
+            #         'max_new_tokens': args.max_new_tokens,
+            #         'temperature': 0.0,
+            #         'do_sample': False
+            #     }
+            #     if len(images) == 1:
+            #         response = pipe((prompt, images[0]), **gen_config)
+            #     else:
+            #         response = pipe((prompt, images), **gen_config)
+            #     prediction = response.text if hasattr(response, 'text') else str(response)
+            #     local_df.at[idx, "prediction"] = prediction
+            #     accelerator.print(f"Row {idx}: {prediction}")
+            #     logging.info(f"Row {idx} completed: {prediction}")
+            #     print("\n\n=== Predicted Answer ===")
+            #     print(prediction)
+            #     print("=== End ===\n\n")
             
         except Exception as e:
             accelerator.print(f"Error processing row {idx}: {e}")

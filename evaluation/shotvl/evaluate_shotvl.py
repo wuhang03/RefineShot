@@ -178,7 +178,7 @@ def main():
     with torch.inference_mode():
         gen_model = accelerator.unwrap_model(model)
         for idx, row in iterable:
-            if row["category"] != args.category: 
+            if row["category"] != args.category and args.category != "all": 
                 continue
             print("row: ", row)
             # quit()

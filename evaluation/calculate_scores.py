@@ -177,15 +177,15 @@ def main():
     hits, letters = [], []
     total_cost = 0
     for _, row in tqdm(df.iterrows(), total=len(df)):
-        # if row["category"] != args.category:
-        #     hit = 0
-        #     letter = 'Z'
-        #     cost = 0
-        # else :
-        hit, letter, cost = eval_row(row, args.model)
-        hits.append(hit)
-        letters.append(letter)
-        total_cost += cost
+        if row["category"] != args.category and args.category != "all":
+            hit = 0
+            letter = 'Z'
+            cost = 0
+        else :
+            hit, letter, cost = eval_row(row, args.model)
+            hits.append(hit)
+            letters.append(letter)
+            total_cost += cost
 
     print("total_cost:", total_cost)
     df["pred_letter"] = letters

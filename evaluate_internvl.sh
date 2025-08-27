@@ -4,11 +4,11 @@
 set -e
 
 # =================== Configuration Variables ===================
-MODEL_NAME="InternVL3-8B"
+MODEL_NAME="InternVL3-2B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
-CATEGORY="composition"
+CATEGORY="camera movement"
 
 OPENAI_API_KEY="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"  # Replace with your actual key or use environment variable
 # ==============================================================

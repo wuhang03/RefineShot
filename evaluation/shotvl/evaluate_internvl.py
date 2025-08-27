@@ -191,9 +191,9 @@ def main():
     # 推理循环
     for idx, row in tqdm(local_df.iterrows(), total=len(local_df)):
         try:
-            # if row["category"] != args.category: 
-            #     local_df.at[idx, "prediction"] = "Z"
-            #     continue
+            if row["category"] != args.category: 
+                local_df.at[idx, "prediction"] = "Z"
+                continue
                 
             vision_msgs, prompt = build_prompt(row, root_dir, args.fps)
 
@@ -235,7 +235,7 @@ def main():
                 local_df.at[idx, "prediction"] = prediction
                 accelerator.print(f"Row {idx}: {prediction}")
                 logging.info(f"Row {idx} completed: {prediction}")  # 完整记录
-                print("\n\n=== Predicted Answer ===")
+                                print("\n\n=== Predicted Answer ===")
                 print(prediction)
                 print("=== End ===\n\n")
             

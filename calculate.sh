@@ -1,11 +1,12 @@
 MODEL_NAME="InternVL3-8B"
-# MODEL_NAME="Qwen2.5-VL-7B"
+MODEL_NAME="Qwen2.5-VL-3B"
+# MODEL_NAME="ShotVL-3B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
 CATEGORY="camera movement"
 
-FILENAME="predictions_merged.xlsx"
+FILENAME="predictions_1756247320.xlsx"
 
 # PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}/${FILENAME}"
 

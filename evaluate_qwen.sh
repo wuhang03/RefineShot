@@ -22,8 +22,7 @@ echo "Starting evaluation pipeline..."
 
 # Ensure output directory exists
 mkdir -p "${OUTPUT_DIR}"
-
-echo "Step 1: Running model evaluation with Accelerate"
+echo "Step 1: Running model evaluation with Accelerate"s
 accelerate launch --num_processes ${NUM_GPUS} evaluation/shotvl/evaluate_qwen.py --model ${MODEL_NAME} --reasoning --output-dir ${OUTPUT_DIR} --category "${CATEGORY}"
 
 echo "Model evaluation completed. Predictions saved to: ${PREDICTION_PATH}"

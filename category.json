@@ -1,5 +1,5 @@
 {
-  "shot_framing": {
+  "shot framing": {
     "all": ["Single", "Insert", "2 shot", "3 shot", "Group shot", "Establishing shot", "Over the shoulder"],
     "breakdown": {
       "subject_count": ["Single", "2 shot", "3 shot", "Group shot"],
@@ -8,16 +8,17 @@
       "environment": ["Establishing shot"]
     }
   },
-  "lighting_type": {
+  "lighting type": {
     "all": ["Daylight", "Artificial light", "Mixed light", "Firelight", "Overcast", "Practical light", "Sunny", "Moonlight", "Fluorescent", "HMI", "Tungsten", "LED"],
     "breakdown": {
       "light_source": ["Daylight", "Artificial light", "Mixed light"],
       "natural_light": ["Overcast", "Sunny", "Moonlight"],
       "artificial_light": ["Fluorescent", "HMI", "Tungsten", "LED"],
-      "visible": ["Practical light"]
+      "visible": ["Practical light"],
+      "firelight": ["Firelight"]
     }
   },
-  "lighting_condition": {
+  "lighting": {
     "all": ["Side light", "Backlight", "Top light", "Underlight", "High contrast", "Low contrast", "Silhouette", "Edge light", "Hard light", "Soft light"],
     "breakdown": {
       "direction": ["Side light", "Backlight", "Top light", "Underlight"],

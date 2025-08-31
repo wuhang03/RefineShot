@@ -192,12 +192,12 @@ def main():
     df["hit"] = hits
 
     grp = df.groupby("category")["hit"].agg(total="count", correct="sum").reset_index()
-    grp["accuracy"] = grp["correct"] / grp["total"]
+    grp["accuracy"] = (grp["correct"] / grp["total"]).round(4) 
     overall = pd.DataFrame({
         "category": ["Overall"],
         "total": [len(df)],
         "correct": [sum(hits)],
-        "accuracy": [sum(hits) / len(df)]
+        "accuracy": [round(sum(hits) / len(df), 6)]  # 保留四位小数
     })
     acc_df = pd.concat([grp, overall], ignore_index=True)
     print(acc_df)

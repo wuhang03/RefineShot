@@ -1,6 +1,7 @@
 import argparse, ast, json, logging, time
 from pathlib import Path
 from typing import List
+import gc
 
 import pandas as pd
 import torch
@@ -32,6 +33,12 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
     prompt = (
         f"Question: {q}\n{opts_block}\n"
         "Please select the most likely answer from the options above."
+    )
+
+    prompt = (
+        f"Question: {q}\n{opts_block}\n"
+        "Please select the most likely answer from the options above."
+        "let's think step by step and explain your reasoning in detail. "
     )
 
     # prompt = (

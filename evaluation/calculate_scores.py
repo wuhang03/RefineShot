@@ -106,8 +106,6 @@ def eval_row(row, gpt_model):
     opts_str = "\n".join(f"{k}. {v}" for k, v in choices.items())
     cost = 0
 
-    print("\n\n=== Predicted Answer ===")
-    print(row["prediction"])
     if pd.isna(row["prediction"]) or str(row["prediction"]).lower() == "nan":
         row["prediction"] = "Z"
 

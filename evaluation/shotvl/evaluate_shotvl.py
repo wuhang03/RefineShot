@@ -35,11 +35,12 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
         "Please select the most likely answer from the options above."
     )
 
-    prompt = (
-        f"Question: {q}\n{opts_block}\n"
-        "Please select the most likely answer from the options above."
-        "let's think step by step and explain your reasoning in detail. "
-    )
+    # if row["category"] == "camera movement":
+    #     prompt += (
+    #         " The options are types of camera movements. "
+    #         "Answer based on the CAMERA's motion (not object motion). "
+    #         "Use the rule: background direction is opposite to camera movement."
+    #     )
 
     # prompt = (
     #     f"Question: {q}\n{opts_block}\n"
@@ -135,6 +136,7 @@ def parse_args():
     p.add_argument("--max-new-tokens", type=int, default=1024)
     p.add_argument("--output-dir", default="eval_results")
     p.add_argument("--category", default="composition")
+    p.add_argument("--check_consistency", action="store_true", help="Whether to check and correct answer consistency between <think> and <answer>")
     return p.parse_args()
 
 
@@ -201,6 +203,34 @@ def main():
             img_in, vid_in = process_vision_info(chat)
 
 
+            # inputs = processor(
+            #     text=[text_in],
+            #     images=img_in,
+            #     videos=vid_in,
+            #     fps=args.fps,
+            #     padding=True,
+            #     return_tensors="pt",
+            # ).to(accelerator.device)
+
+            # gen = gen_model.generate(
+            #     **inputs,
+            #     max_new_tokens=args.max_new_tokens,
+            #     do_sample=False,
+            # )
+            # trimmed = gen[0][inputs.input_ids.shape[-1]:]
+            # answer = processor.decode(trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+
+            # print("\n\n=== Predicted Answer ===")
+            # print(answer)
+            # print("=== End ===\n\n")
+
+
+            # local_df.at[idx, "prediction"] = answer
+            # logging.info(answer)
+            # torch.cuda.empty_cache()
+            # gc.collect()
+            # ...existing code...
+
             inputs = processor(
                 text=[text_in],
                 images=img_in,
@@ -218,15 +248,104 @@ def main():
             trimmed = gen[0][inputs.input_ids.shape[-1]:]
             answer = processor.decode(trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False)
 
-            print("\n\n=== Predicted Answer ===")
+            print("\n\n=== Initial Predicted Answer ===")
+            print(answer)
+            print("=== End Initial Answer ===\n\n")
+
+
+            # 一致性检查和修正
+            if "<think>" in answer and "<answer>" in answer and args.check_consistency:
+                # 构建一致性检查的prompt
+                consistency_prompt = f"""
+            Please carefully review the following response and check if the reasoning in <think> and the final answer in <answer> are consistent.
+
+            {answer}
+
+            Your task:
+            1. Extract the conclusion from the <think> section (look for statements like "Therefore, the correct answer is X")
+            2. Extract the answer from the <answer> section
+            3. Check if they match exactly
+            4. If they are consistent, respond with: CONSISTENT
+            5. If they are inconsistent, respond with: INCONSISTENT - The answer should be [X] based on the reasoning in <think>
+
+            Please respond with only one of these formats:
+            - CONSISTENT
+            - INCONSISTENT - The answer should be [X] based on the reasoning in <think>
+            """
+
+                # 创建一致性检查的chat
+                consistency_chat = [
+                    {"role": "system", "content": "You are a helpful assistant that checks reasoning consistency."},
+                    {"role": "user", "content": [{"type": "text", "text": consistency_prompt}]},
+                ]
+                
+                consistency_text_in = processor.apply_chat_template(
+                    consistency_chat, tokenize=False, add_generation_prompt=True
+                )
+                
+                consistency_inputs = processor(
+                    text=[consistency_text_in],
+                    images=None,
+                    videos=None,
+                    padding=True,
+                    return_tensors="pt",
+                ).to(accelerator.device)
+                
+                # 生成一致性检查结果
+                consistency_gen = gen_model.generate(
+                    **consistency_inputs,
+                    max_new_tokens=100,
+                    do_sample=False,
+                )
+                consistency_trimmed = consistency_gen[0][consistency_inputs.input_ids.shape[-1]:]
+                consistency_result = processor.decode(
+                    consistency_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+                )
+                
+                print(f"\n=== Consistency Check Result ===")
+                print(f"Consistency Result: {consistency_result}")
+                
+                # 如果不一致，修正答案
+                if "INCONSISTENT" in consistency_result.upper():
+                    import re
+                    
+                    # 从一致性检查结果中提取正确答案
+                    corrected_match = re.search(r'The answer should be \[?([A-G])\]?', consistency_result, re.IGNORECASE)
+                    
+                    if corrected_match:
+                        corrected_answer = corrected_match.group(1)
+                        print(f"Detected inconsistency. Correcting answer to: {corrected_answer}")
+                        
+                        # 替换answer部分
+                        answer_start = answer.find("<answer>")
+                        answer_end = answer.find("</answer>") + 9
+                        
+                        if answer_start != -1 and answer_end != -1:
+                            new_answer_section = f"<answer>\n{corrected_answer}\n</answer>"
+                            answer = answer[:answer_start] + new_answer_section + answer[answer_end:]
+                            print(f"=== Corrected Answer ===")
+                        else:
+                            print("Could not locate <answer> tags for correction")
+                    else:
+                        print("Could not extract corrected answer from consistency check")
+                else:
+                    print("=== Answer is consistent ===")
+                
+                # print("=========================")
+                
+                # 清理GPU内存
+                torch.cuda.empty_cache()
+
+            print("\n\n=== Final Predicted Answer ===")
             print(answer)
             print("=== End ===\n\n")
 
+    local_df.at[idx, "prediction"] = answer
+    logging.info(answer)
+    torch.cuda.empty_cache()
+    gc.collect()
 
-            local_df.at[idx, "prediction"] = answer
-            logging.info(answer)
-            torch.cuda.empty_cache()
-            gc.collect()
+# ...existing code...
 
     json_str = local_df.to_json(orient="split", index=False)
     all_json = accelerator.gather_for_metrics([json_str], use_gather_object=True)

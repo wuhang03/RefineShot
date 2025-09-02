@@ -181,9 +181,10 @@ def main():
             cost = 0
         else :
             hit, letter, cost = eval_row(row, args.model)
-            hits.append(hit)
-            letters.append(letter)
-            total_cost += cost
+            
+        hits.append(hit)
+        letters.append(letter)
+        total_cost += cost
 
     print("total_cost:", total_cost)
     df["pred_letter"] = letters

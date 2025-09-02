@@ -4,9 +4,9 @@ MODEL_NAME="ShotVL-3B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
-CATEGORY="all"
+CATEGORY="camera movement"
 
-FILENAME="predictions_1756750954.xlsx"
+FILENAME="predictions_1756847087.xlsx"
 
 # PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}/${FILENAME}"
 

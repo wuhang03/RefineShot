@@ -42,7 +42,7 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
     #         "Use the rule: background direction is opposite to camera movement."
     #     )
 
-    # prompt = (
+    # # prompt = (
     #     f"Question: {q}\n{opts_block}\n"
     #     "Please answer in the following format, and output each section only ONCE:\n"
     #     "<think>\n"
@@ -257,21 +257,21 @@ def main():
             if "<think>" in answer and "<answer>" in answer and args.check_consistency:
                 # 构建一致性检查的prompt
                 consistency_prompt = f"""
-            Please carefully review the following response and check if the reasoning in <think> and the final answer in <answer> are consistent.
+                    Please carefully review the following response and check if the reasoning in <think> and the final answer in <answer> are consistent.
 
-            {answer}
+                    {answer}
 
-            Your task:
-            1. Extract the conclusion from the <think> section (look for statements like "Therefore, the correct answer is X")
-            2. Extract the answer from the <answer> section
-            3. Check if they match exactly
-            4. If they are consistent, respond with: CONSISTENT
-            5. If they are inconsistent, respond with: INCONSISTENT - The answer should be [X] based on the reasoning in <think>
+                    Your task:
+                    1. Extract the conclusion from the <think> section (look for statements like "Therefore, the correct answer is X")
+                    2. Extract the answer from the <answer> section
+                    3. Check if they match exactly
+                    4. If they are consistent, respond with: CONSISTENT
+                    5. If they are inconsistent, respond with: INCONSISTENT - The answer should be [X] based on the reasoning in <think>
 
-            Please respond with only one of these formats:
-            - CONSISTENT
-            - INCONSISTENT - The answer should be [X] based on the reasoning in <think>
-            """
+                    Please respond with only one of these formats:
+                    - CONSISTENT
+                    - INCONSISTENT - The answer should be [X] based on the reasoning in <think>
+                    """
 
                 # 创建一致性检查的chat
                 consistency_chat = [
@@ -340,10 +340,11 @@ def main():
             print(answer)
             print("=== End ===\n\n")
 
-    local_df.at[idx, "prediction"] = answer
-    logging.info(answer)
-    torch.cuda.empty_cache()
-    gc.collect()
+            local_df.at[idx, "prediction"] = answer
+            print("answer add to excel")
+            logging.info(answer)
+            torch.cuda.empty_cache()
+            gc.collect()
 
 # ...existing code...
 

@@ -1,0 +1,139 @@
+2025-09-02 23:20:01,078 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/L85T-a6JUUw.mp4_48.mp4', total_frames=58, video_fps=23.976023976023978, time=0.329s
+2025-09-02 23:20:06,036 - INFO - <think> The scene shows a static view through a window, looking out onto a snowy street with people walking around. There is no indication of camera movement such as panning or zooming. Therefore, the correct answer is D.</think> <answer>D</answer>
+2025-09-02 23:20:07,149 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/u111KCzMYNg.webm_22.mp4', total_frames=143, video_fps=23.976023976023978, time=0.979s
+2025-09-02 23:20:14,918 - INFO - <think> The scene shows a group of people riding horses towards a castle at night. The camera starts with a wide shot of the castle and then slowly zooms in, focusing on the riders as they approach the entrance. This suggests that the camera is moving closer to the subjects while maintaining a steady focus on them. Therefore, the correct answer is C.</think> <answer>C</answer>
+2025-09-02 23:20:15,198 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/videoplayback (27).mp4_scene_7_1.mp4', total_frames=44, video_fps=25.0, time=0.151s
+2025-09-02 23:20:19,007 - INFO - <think> The scene shows a man walking past lockers, then quickly turning his head to look at something off-screen. The camera follows him as he moves, but does not pan or zoom significantly. Therefore, the correct answer is A.
+</think> <answer>A</answer>
+2025-09-02 23:20:19,560 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/5X5i4qN6M88.webm_40.mp4', total_frames=74, video_fps=24.0, time=0.425s
+2025-09-02 23:20:25,938 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/5X5i4qN6M88.webm_40.mp4', total_frames=74, video_fps=24.0, time=0.432s
+2025-09-02 23:20:28,024 - INFO - <think>The scene shows two men walking towards the camera, with a rickshaw in front of them. The background features a large building with several people around it. The camera appears to be stationary as the subjects move closer to it. There is no indication of zooming or panning, so the correct answer is B.</think> <answer>
+B
+</answer>
+2025-09-02 23:20:28,828 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/OSeRp3JnpHA.webm_33.mp4', total_frames=83, video_fps=23.976023976023978, time=0.670s
+2025-09-02 23:20:34,144 - INFO - <think> The scene shows a group of people riding horses across a grassy field. The camera is moving forward, capturing the riders as they move through the landscape. This is indicated by the changing perspective of the riders and the background scenery as the camera moves along with them. Therefore, the correct answer is D.
+</think> <answer>D</answer>
+2025-09-02 23:20:34,674 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/L-L23XzHX9w.webm_156.mp4', total_frames=67, video_fps=23.976023976023978, time=0.418s
+2025-09-02 23:20:40,515 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/L-L23XzHX9w.webm_156.mp4', total_frames=67, video_fps=23.976023976023978, time=0.408s
+2025-09-02 23:20:42,441 - INFO - <think>The scene shows a group of people running across a field towards a mountainous background. The camera appears to be stationary, capturing the entire group as they move forward. There is no indication of any camera movement such as panning or tilting.</think> <answer>
+A
+</answer>
+2025-09-02 23:20:43,739 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/Oa4QcdNsqUE.webm_31.mp4', total_frames=182, video_fps=23.976023976023978, time=1.180s
+2025-09-02 23:20:54,225 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/Oa4QcdNsqUE.webm_31.mp4', total_frames=182, video_fps=23.976023976023978, time=1.156s
+2025-09-02 23:20:58,827 - INFO - <think>The image shows two people standing close together in a dimly lit room, with one person leaning in towards the other. The scene appears to be static, with no indication of camera movement such as panning or tilting. Therefore, the correct answer is A.</think> <answer>
+A
+</answer>
+2025-09-02 23:21:01,002 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/dSrX8b8BYy0.webm_19.mp4', total_frames=257, video_fps=23.976023976023978, time=2.040s
+2025-09-02 23:21:13,657 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/dSrX8b8BYy0.webm_19.mp4', total_frames=257, video_fps=23.976023976023978, time=1.807s
+2025-09-02 23:21:21,407 - INFO - <think> The image shows a spaceship moving away from Earth, which suggests a pan to the right or tilt down camera movement. Given that the spaceship is moving away from the viewer, the camera would be tilting down to maintain the spaceship in the frame as it moves away.
+</think> <answer>
+D
+</answer>
+2025-09-02 23:21:21,896 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/QgRY22rz7m8.webm_2.mp4', total_frames=81, video_fps=23.976023976023978, time=0.364s
+2025-09-02 23:21:28,390 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/QgRY22rz7m8.webm_2.mp4', total_frames=81, video_fps=23.976023976023978, time=0.305s
+2025-09-02 23:21:30,810 - INFO - <think>The image shows a close-up view of a hand holding a business card. There is no indication of camera movement such as panning or tilting. The focus is solely on the business card, which suggests that the camera remains stationary while the hand moves slightly to adjust the angle for better visibility.</think> <answer>
+A
+</answer>
+2025-09-02 23:21:32,105 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/w1lLQrWq0rQ.webm_30.mp4', total_frames=155, video_fps=23.976023976023978, time=1.160s
+2025-09-02 23:21:42,006 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/w1lLQrWq0rQ.webm_30.mp4', total_frames=155, video_fps=23.976023976023978, time=1.186s
+2025-09-02 23:21:46,891 - INFO - <think> The scene shows a person's feet being set on fire by a flame thrower. The camera then quickly pans up to show a man in a cowboy hat surrounded by flames. This suggests a rapid transition from a close-up shot to a wider shot, likely due to the dramatic nature of the scene. Therefore, the correct answer is B.
+</think> <answer>
+B
+</answer>
+2025-09-02 23:21:47,583 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/U-rTc76jM5Y.webm_7.mp4', total_frames=161, video_fps=23.976023976023978, time=0.594s
+2025-09-02 23:21:56,416 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/U-rTc76jM5Y.webm_7.mp4', total_frames=161, video_fps=23.976023976023978, time=0.590s
+2025-09-02 23:22:00,909 - INFO - <think> The scene shows a man sitting on a bed in a dimly lit room with curtains in the background. The camera appears to be stationary, capturing the man from a side angle as he writes or draws on a piece of paper. There is no indication of any camera movement such as panning or tilting.
+</think> <answer>
+A
+</answer>
+2025-09-02 23:22:01,660 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/rUZ8okSnE4k.mkv_28.mp4', total_frames=98, video_fps=23.976023976023978, time=0.622s
+2025-09-02 23:22:08,475 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/rUZ8okSnE4k.mkv_28.mp4', total_frames=98, video_fps=23.976023976023978, time=0.563s
+2025-09-02 23:22:11,728 - INFO - <think>The scene shows a person running down a dimly lit hallway with lockers on either side. The camera follows the subject as they move forward, creating a sense of depth and perspective. This suggests that the camera is moving forward or panning to keep the subject centered in the frame.
+
+Answer: D </think> <answer>
+D
+</answer>
+2025-09-02 23:22:12,386 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/Ya3IRyzlb-s.webm_50.mp4', total_frames=91, video_fps=23.976023976023978, time=0.562s
+2025-09-02 23:22:20,544 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/Ya3IRyzlb-s.webm_50.mp4', total_frames=91, video_fps=23.976023976023978, time=0.553s
+2025-09-02 23:22:23,160 - INFO - <think> The scene shows a woman walking through a grand room filled with ornate furniture and decorations. The camera appears to be stationary at first, capturing her as she moves across the space. As she continues to walk, the camera slowly pans to follow her movement, maintaining focus on her as she progresses through the room. This suggests that the camera is panning to keep her centered in the frame while she moves forward.
+</think> <answer>
+B
+</answer>
+2025-09-02 23:22:23,737 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/CbA1HWWgTbY.webm_1.mp4', total_frames=95, video_fps=23.976023976023978, time=0.467s
+2025-09-02 23:22:29,903 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/CbA1HWWgTbY.webm_1.mp4', total_frames=95, video_fps=23.976023976023978, time=0.348s
+2025-09-02 23:22:32,215 - INFO - <think> The image shows a static shot of the moon in the sky. There is no indication of camera movement such as panning or tilting. Therefore, the correct answer is D.
+</think> <answer>
+D
+</answer>
+2025-09-02 23:22:32,467 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/videoplayback (27).mp4_scene_31_1.mp4', total_frames=51, video_fps=25.0, time=0.130s
+2025-09-02 23:22:37,558 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/videoplayback (27).mp4_scene_31_1.mp4', total_frames=51, video_fps=25.0, time=0.126s
+2025-09-02 23:22:38,511 - INFO - <think> The scene shows a street view with buildings on both sides, and the camera appears to be moving forward along the street. This suggests a forward pan or tracking shot. There is no indication of zooming or panning to the side, so the correct answer is A.</think> <answer>
+A
+</answer>
+2025-09-02 23:22:39,558 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/0LCrNFZH8es.webm_10.mp4', total_frames=132, video_fps=23.976023976023978, time=0.941s
+2025-09-02 23:22:47,000 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/0LCrNFZH8es.webm_10.mp4', total_frames=132, video_fps=23.976023976023978, time=0.934s
+2025-09-02 23:22:49,945 - INFO - <think> The scene shows an airplane flying over water with a cityscape in the background. The camera appears to be tracking the airplane as it moves forward, maintaining focus on the aircraft while capturing the surrounding environment. This suggests that the camera is moving forward or panning to follow the plane's trajectory.
+</think> <answer>
+D
+</answer>
+2025-09-02 23:22:50,559 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/ArXf6X_0-ww.webm_33.mp4', total_frames=93, video_fps=24.0, time=0.520s
+2025-09-02 23:22:55,657 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/ArXf6X_0-ww.webm_33.mp4', total_frames=93, video_fps=24.0, time=0.467s
+2025-09-02 23:22:57,681 - INFO - <think> The image shows a wide-angle view of a snowy cityscape with various buildings, people, and streetlights. There is no indication of camera movement such as panning or tilting. Therefore, the correct answer is B.
+</think> <answer>
+B
+</answer>
+2025-09-02 23:22:58,458 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/videoplayback (23).mp4_scene_3_1.mp4', total_frames=50, video_fps=23.976023976023978, time=0.682s
+2025-09-02 23:23:03,053 - INFO - <think> The scene shows a man standing on top of a train, and then the camera quickly pans down to show people getting off the train. This suggests that the camera is moving downward to capture the action of people leaving the train.
+</think> <answer>A</answer>
+2025-09-02 23:23:03,450 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/_ZYHlc2Niaw.webm_112.mp4', total_frames=51, video_fps=23.976023976023978, time=0.307s
+2025-09-02 23:23:07,458 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/_ZYHlc2Niaw.webm_112.mp4', total_frames=51, video_fps=23.976023976023978, time=0.322s
+2025-09-02 23:23:08,672 - INFO - <think> The scene shows a person falling through the sky, which suggests a downward view or tilt. This is typically achieved by tilting the camera down. Therefore, the correct answer is D.</think> <answer>
+D
+</answer>
+2025-09-02 23:23:09,128 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/02P6SAFU7mo.webm_12.mp4', total_frames=65, video_fps=23.976023976023978, time=0.358s
+2025-09-02 23:23:13,849 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/02P6SAFU7mo.webm_12.mp4', total_frames=65, video_fps=23.976023976023978, time=0.355s
+2025-09-02 23:23:15,397 - INFO - <think> The camera starts with a close-up view of the car's front wheel, then pans to the side to show the car driving through an underpass. This suggests that the camera is moving horizontally to follow the car as it moves forward.
+</think> <answer>
+A
+</answer>
+2025-09-02 23:23:15,982 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/nVTrJnvpD7Q.webm_1.mp4', total_frames=121, video_fps=23.976023976023978, time=0.466s
+2025-09-02 23:23:21,661 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/nVTrJnvpD7Q.webm_1.mp4', total_frames=121, video_fps=23.976023976023978, time=0.467s
+2025-09-02 23:23:24,464 - INFO - <think> The image shows a static shot of an old wooden structure with a circular object inside. There is no indication of camera movement such as tilting or panning. Therefore, the correct answer is B.
+</think> <answer>
+B
+</answer>
+2025-09-02 23:23:25,480 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/Ya3IRyzlb-s.webm_60.mp4', total_frames=103, video_fps=23.976023976023978, time=0.912s
+2025-09-02 23:23:30,629 - INFO - <think> The scene shows a group of warriors riding horses across a desert landscape. The camera is moving forward, capturing the vastness of the desert and the formation of the warriors as they advance. This suggests that the camera is panning or tracking forward to follow the movement of the warriors.
+</think> <answer>D</answer>
+2025-09-02 23:23:31,428 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/Oa4QcdNsqUE.webm_5.mp4', total_frames=76, video_fps=23.976023976023978, time=0.703s
+2025-09-02 23:23:38,039 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/Oa4QcdNsqUE.webm_5.mp4', total_frames=76, video_fps=23.976023976023978, time=0.622s
+2025-09-02 23:23:39,928 - INFO - <think>The image shows an aerial view of a city at night, with numerous illuminated buildings creating a vibrant urban landscape. The perspective suggests that the camera is moving forward or panning across the scene, providing a comprehensive overview of the city's layout and architecture. Given the nature of the image, there is no indication of zooming or tilting, so the most likely camera movement is a forward or lateral pan.</think> <answer>
+D
+</answer>
+2025-09-02 23:23:40,519 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/KMxH3Dc89ts.webm_56.mp4', total_frames=65, video_fps=23.976023976023978, time=0.496s
+2025-09-02 23:23:45,821 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/KMxH3Dc89ts.webm_56.mp4', total_frames=65, video_fps=23.976023976023978, time=0.509s
+2025-09-02 23:23:47,357 - INFO - <think> The scene shows Superman flying through the cityscape, and the camera follows him as he moves across the skyline. This suggests a panning or tracking shot that keeps Superman centered while capturing the surrounding environment. There is no indication of zooming or dolly movement, so the correct answer is B.
+</think> <answer>
+B
+</answer>
+2025-09-02 23:23:47,818 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/6VNL2NdYvFQ.webm_2.mp4', total_frames=92, video_fps=23.976023976023978, time=0.367s
+2025-09-02 23:23:53,409 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/6VNL2NdYvFQ.webm_2.mp4', total_frames=92, video_fps=23.976023976023978, time=0.329s
+2025-09-02 23:23:55,528 - INFO - <think> The scene shows a character walking through a dimly lit hallway, and the camera follows the character from behind as they move forward. This suggests that the camera is moving forward along with the character, maintaining a consistent perspective. Therefore, the correct answer is C.</think> <answer>
+C
+</answer>
+2025-09-02 23:23:56,496 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/TzxTr3o3qzY.webm_17.mp4', total_frames=135, video_fps=24.0, time=0.877s
+2025-09-02 23:24:02,987 - INFO - <think> The scene shows two individuals walking through an industrial setting at night. The camera starts with a close-up view of them, then slowly zooms out to reveal more of their surroundings, including a large circular structure with intricate designs. The camera movement appears to be a slow pan to the right, capturing the environment as they move forward. Therefore, the correct answer is C.
+</think> <answer>C</answer>
+2025-09-02 23:24:03,353 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/qiGhCbwdS04.webm_14.mp4', total_frames=72, video_fps=23.976023976023978, time=0.253s
+2025-09-02 23:24:07,606 - INFO - <think> The scene shows a woman walking through a door into a room filled with people. The camera follows her as she moves forward, maintaining focus on her while capturing the surrounding environment. This suggests that the camera is moving forward or panning to keep her in frame as she walks through the doorway.
+</think> <answer>D</answer>
+2025-09-02 23:24:07,935 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/EmKR8MQammg.webm_87.mp4', total_frames=93, video_fps=23.976023976023978, time=0.229s
+2025-09-02 23:24:13,374 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/EmKR8MQammg.webm_87.mp4', total_frames=93, video_fps=23.976023976023978, time=0.234s
+2025-09-02 23:24:15,276 - INFO - <think> The image shows a man in a dimly lit room, sitting up in bed with his arms raised. The camera appears to be stationary, focusing on the man as he moves slightly. There is no indication of any camera movement such as panning or tilting. Therefore, the correct answer is A.</think> <answer>
+A
+</answer>
+2025-09-02 23:24:15,895 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/YJJGXkbeIiM.webm_74.mp4', total_frames=110, video_fps=23.976023976023978, time=0.513s
+2025-09-02 23:24:20,622 - INFO - <think> The scene shows a flooded area with a building in the background. The camera appears to be stationary at first, but then slowly zooms in towards the building, focusing more closely on the interior as it moves closer. This suggests a zoom-in camera movement.
+</think> <answer>D</answer>
+2025-09-02 23:24:21,701 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/U-rTc76jM5Y.webm_3.mp4', total_frames=158, video_fps=23.976023976023978, time=0.983s
+2025-09-02 23:24:29,284 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/U-rTc76jM5Y.webm_3.mp4', total_frames=158, video_fps=23.976023976023978, time=0.989s

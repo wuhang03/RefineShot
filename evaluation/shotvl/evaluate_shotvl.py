@@ -2,7 +2,7 @@ import argparse, ast, json, logging, time
 from pathlib import Path
 from typing import List
 import gc
-
+import re
 import pandas as pd
 import torch
 from tqdm import tqdm
@@ -35,12 +35,12 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
         "Please select the most likely answer from the options above."
     )
 
-    # if row["category"] == "camera movement":
-    #     prompt += (
-    #         " The options are types of camera movements. "
-    #         "Answer based on the CAMERA's motion (not object motion). "
-    #         "Use the rule: background direction is opposite to camera movement."
-    #     )
+    if row["category"] == "camera movement":
+        prompt += (
+            " The options are types of camera movements. "
+            "Answer based on the CAMERA's motion (not object motion). "
+            "Use the rule: background direction is opposite to camera movement."
+        )
 
     # # prompt = (
     #     f"Question: {q}\n{opts_block}\n"
@@ -139,6 +139,101 @@ def parse_args():
     p.add_argument("--check_consistency", action="store_true", help="Whether to check and correct answer consistency between <think> and <answer>")
     return p.parse_args()
 
+
+def resolve_inconsistency_with_model(answer, think_answer, answer_section, vision_msgs, row, processor, gen_model, args, accelerator):
+    """
+    当检测到think和answer不一致时，让模型基于图像重新判断哪个答案正确
+    """
+    # 构建判断prompt，让模型基于图像选择正确答案
+    judge_prompt = f"""
+Based on the image/video, I need you to determine which answer is correct.
+
+The reasoning process concluded with: {think_answer}
+But the final answer section shows: {answer_section}
+
+Question: {row['question']}
+Options: {safe_load(row['options'])}
+
+Please analyze the image/video again and determine which answer ({think_answer} or {answer_section}) is correct based on the visual evidence.
+
+Respond with only the letter of the correct answer (A, B, C, D, etc.).
+"""
+    
+    # 创建判断的chat (包含原始图像/视频)
+    judge_chat = [
+        {"role": "system", "content": "You are a helpful assistant that determines the correct answer based on visual evidence."},
+        {"role": "user", "content": vision_msgs + [{"type": "text", "text": judge_prompt}]},
+    ]
+    
+    judge_text_in = processor.apply_chat_template(
+        judge_chat, tokenize=False, add_generation_prompt=True
+    )
+    judge_img_in, judge_vid_in = process_vision_info(judge_chat)
+    
+    judge_inputs = processor(
+        text=[judge_text_in],
+        images=judge_img_in,
+        videos=judge_vid_in,
+        fps=args.fps,
+        padding=True,
+        return_tensors="pt",
+    ).to(accelerator.device)
+    
+    # 生成判断结果
+    judge_gen = gen_model.generate(
+        **judge_inputs,
+        max_new_tokens=50,
+        do_sample=False,
+    )
+    judge_trimmed = judge_gen[0][judge_inputs.input_ids.shape[-1]:]
+    judge_result = processor.decode(
+        judge_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+    ).strip()
+    
+    print(f"=== Model Judgment ===")
+    print(f"Model selected: {judge_result}")
+    
+    # 从判断结果中提取答案
+    # import re
+    judge_match = re.search(r'([A-G])', judge_result.upper())
+    
+    if judge_match:
+        final_answer = judge_match.group(1)
+        print(f"Final decision: {final_answer}")
+        
+        # 使用模型选择的答案
+        answer_start = answer.find("<answer>")
+        answer_end = answer.find("</answer>") + 9
+        
+        if answer_start != -1 and answer_end != -1:
+            new_answer_section = f"<answer>\n{final_answer}\n</answer>"
+            updated_answer = answer[:answer_start] + new_answer_section + answer[answer_end:]
+            print(f"=== Answer Corrected to: {final_answer} (based on model judgment) ===")
+            
+            # 清理GPU内存
+            torch.cuda.empty_cache()
+            return updated_answer
+        else:
+            print("Could not locate <answer> tags for correction")
+    else:
+        # 如果无法从模型判断中提取答案，默认使用think中的答案
+        print(f"=== Could not parse model judgment, using think answer: {think_answer} ===")
+    
+    # 回退到使用think中的答案
+    answer_start = answer.find("<answer>")
+    answer_end = answer.find("</answer>") + 9
+    
+    if answer_start != -1 and answer_end != -1:
+        new_answer_section = f"<answer>\n{think_answer}\n</answer>"
+        updated_answer = answer[:answer_start] + new_answer_section + answer[answer_end:]
+        print(f"=== Answer Corrected to: {think_answer} ===")
+        
+        # 清理GPU内存
+        torch.cuda.empty_cache()
+        return updated_answer
+    else:
+        print("Could not locate <answer> tags for correction")
+        return answer
 
 def main():
     args = parse_args()
@@ -251,90 +346,204 @@ def main():
             print("\n\n=== Initial Predicted Answer ===")
             print(answer)
             print("=== End Initial Answer ===\n\n")
-
-
             # 一致性检查和修正
             if "<think>" in answer and "<answer>" in answer and args.check_consistency:
-                # 构建一致性检查的prompt
-                consistency_prompt = f"""
-                    Please carefully review the following response and check if the reasoning in <think> and the final answer in <answer> are consistent.
-
-                    {answer}
-
-                    Your task:
-                    1. Extract the conclusion from the <think> section (look for statements like "Therefore, the correct answer is X")
-                    2. Extract the answer from the <answer> section
-                    3. Check if they match exactly
-                    4. If they are consistent, respond with: CONSISTENT
-                    5. If they are inconsistent, respond with: INCONSISTENT - The answer should be [X] based on the reasoning in <think>
-
-                    Please respond with only one of these formats:
-                    - CONSISTENT
-                    - INCONSISTENT - The answer should be [X] based on the reasoning in <think>
-                    """
-
-                # 创建一致性检查的chat
-                consistency_chat = [
-                    {"role": "system", "content": "You are a helpful assistant that checks reasoning consistency."},
-                    {"role": "user", "content": [{"type": "text", "text": consistency_prompt}]},
-                ]
                 
-                consistency_text_in = processor.apply_chat_template(
-                    consistency_chat, tokenize=False, add_generation_prompt=True
-                )
-                
-                consistency_inputs = processor(
-                    text=[consistency_text_in],
-                    images=None,
-                    videos=None,
-                    padding=True,
-                    return_tensors="pt",
-                ).to(accelerator.device)
-                
-                # 生成一致性检查结果
-                consistency_gen = gen_model.generate(
-                    **consistency_inputs,
-                    max_new_tokens=100,
-                    do_sample=False,
-                )
-                consistency_trimmed = consistency_gen[0][consistency_inputs.input_ids.shape[-1]:]
-                consistency_result = processor.decode(
-                    consistency_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-                )
-                
-                print(f"\n=== Consistency Check Result ===")
-                print(f"Consistency Result: {consistency_result}")
-                
-                # 如果不一致，修正答案
-                if "INCONSISTENT" in consistency_result.upper():
-                    import re
+                def extract_think_answer(text, processor, gen_model, accelerator):
+                    """使用模型从文本中提取<think>部分的答案"""
+                    # 提取<think>部分
+                    think_match = re.search(r'<think>(.*?)</think>', text, re.DOTALL | re.IGNORECASE)
+                    if not think_match:
+                        return None
                     
-                    # 从一致性检查结果中提取正确答案
-                    corrected_match = re.search(r'The answer should be \[?([A-G])\]?', consistency_result, re.IGNORECASE)
+                    think_content = think_match.group(1)
                     
-                    if corrected_match:
-                        corrected_answer = corrected_match.group(1)
-                        print(f"Detected inconsistency. Correcting answer to: {corrected_answer}")
+                    # 构建提取答案的prompt
+                    extract_prompt = f"""
+                Please extract the final answer from the following reasoning text. Look for statements that conclude with a specific answer choice (like A, B, C, D, etc.).
+
+                Reasoning text:
+                {think_content}
+
+                Please respond with only the letter of the answer (A, B, C, D, etc.) that this reasoning concludes with. If no clear answer is stated, respond with "NONE".
+                """
+                    
+                    # 创建提取答案的chat
+                    extract_chat = [
+                        {"role": "system", "content": "You are a helpful assistant that extracts answers from reasoning text."},
+                        {"role": "user", "content": [{"type": "text", "text": extract_prompt}]},
+                    ]
+                    
+                    extract_text_in = processor.apply_chat_template(
+                        extract_chat, tokenize=False, add_generation_prompt=True
+                    )
+                    
+                    extract_inputs = processor(
+                        text=[extract_text_in],
+                        images=None,
+                        videos=None,
+                        padding=True,
+                        return_tensors="pt",
+                    ).to(accelerator.device)
+                    
+                    # 生成提取结果
+                    extract_gen = gen_model.generate(
+                        **extract_inputs,
+                        max_new_tokens=50,
+                        do_sample=False,
+                    )
+                    extract_trimmed = extract_gen[0][extract_inputs.input_ids.shape[-1]:]
+                    extract_result = processor.decode(
+                        extract_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+                    ).strip()
+                    
+                    print(f"Model extracted from think: {extract_result}")
+                    
+                    # 从模型回复中提取答案
+                    # import re
+                    answer_match = re.search(r'([A-G])', extract_result.upper())
+                    
+                    if answer_match and "NONE" not in extract_result.upper():
+                        # 清理GPU内存
+                        torch.cuda.empty_cache()
+                        return answer_match.group(1).upper()
+                    else:
+                        # 清理GPU内存
+                        torch.cuda.empty_cache()
+                        return None
+                                
+                def extract_answer_section(text):
+                    """从文本中提取<answer>部分的答案"""
+                    # 提取<answer>部分
+                    answer_match = re.search(r'<answer>\s*([A-G])\s*</answer>', text, re.IGNORECASE)
+                    if answer_match:
+                        return answer_match.group(1).upper()
+                    
+                    return None
+                
+                # 提取think和answer部分的答案
+                # think_answer = extract_think_answer(answer)
+                think_answer = extract_think_answer(answer, processor, gen_model, accelerator)
+                answer_section = extract_answer_section(answer)
+                
+                print(f"\n=== Consistency Check ===")
+                print(f"Think答案: {think_answer}")
+                print(f"Answer部分答案: {answer_section}")
+                
+                # 检查一致性
+                if think_answer and answer_section:
+                    if think_answer == answer_section:
+                        print("=== Answer is consistent ===")
+                    else:
+                        print(f"=== Inconsistency Detected ===")
+                        print(f"Think部分结论: {think_answer}")
+                        print(f"Answer部分: {answer_section}")
+                        print(f"Using answer from <think> section: {think_answer}")
                         
-                        # 替换answer部分
+                        # 替换answer部分为think中的答案
                         answer_start = answer.find("<answer>")
                         answer_end = answer.find("</answer>") + 9
-                        
+
                         if answer_start != -1 and answer_end != -1:
-                            new_answer_section = f"<answer>\n{corrected_answer}\n</answer>"
-                            answer = answer[:answer_start] + new_answer_section + answer[answer_end:]
-                            print(f"=== Corrected Answer ===")
+                            # 调用函数来解决不一致问题
+                            answer = resolve_inconsistency_with_model(
+                                answer, think_answer, answer_section, vision_msgs, row,
+                                processor, gen_model, args, accelerator
+                            )
                         else:
                             print("Could not locate <answer> tags for correction")
-                    else:
-                        print("Could not extract corrected answer from consistency check")
                 else:
-                    print("=== Answer is consistent ===")
+                    if not think_answer:
+                        print("警告：无法从<think>部分提取答案")
+                    if not answer_section:
+                        print("警告：无法从<answer>部分提取答案")
+                    print("=== Skipping consistency check ===")
                 
-                # print("=========================")
+                print("=== End Consistency Check ===\n")
+
+
+            # # 一致性检查和修正
+            # if "<think>" in answer and "<answer>" in answer and args.check_consistency:
+            #     # 构建一致性检查的prompt
+            #     consistency_prompt = f"""
+            #         Please carefully review the following response and check if the reasoning in <think> and the final answer in <answer> are consistent.
+
+            #         {answer}
+
+            #         Your task:
+            #         1. Extract the conclusion from the <think> section (look for statements like "Therefore, the correct answer is X")
+            #         2. Extract the answer from the <answer> section
+            #         3. Check if they match exactly
+            #         4. If they are consistent, respond with: CONSISTENT
+            #         5. If they are inconsistent, respond with: INCONSISTENT - The answer should be [X] based on the reasoning in <think>
+
+            #         Please respond with only one of these formats:
+            #         - CONSISTENT
+            #         - INCONSISTENT - The answer should be [X] based on the reasoning in <think>
+            #         """
+
+            #     # 创建一致性检查的chat
+            #     consistency_chat = [
+            #         {"role": "system", "content": "You are a helpful assistant that checks reasoning consistency."},
+            #         {"role": "user", "content": [{"type": "text", "text": consistency_prompt}]},
+            #     ]
                 
-                # 清理GPU内存
-                torch.cuda.empty_cache()
+            #     consistency_text_in = processor.apply_chat_template(
+            #         consistency_chat, tokenize=False, add_generation_prompt=True
+            #     )
+                
+            #     consistency_inputs = processor(
+            #         text=[consistency_text_in],
+            #         images=None,
+            #         videos=None,
+            #         padding=True,
+            #         return_tensors="pt",
+            #     ).to(accelerator.device)
+                
+            #     # 生成一致性检查结果
+            #     consistency_gen = gen_model.generate(
+            #         **consistency_inputs,
+            #         max_new_tokens=100,
+            #         do_sample=False,
+            #     )
+            #     consistency_trimmed = consistency_gen[0][consistency_inputs.input_ids.shape[-1]:]
+            #     consistency_result = processor.decode(
+            #         consistency_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+            #     )
+                
+            #     print(f"\n=== Consistency Check Result ===")
+            #     print(f"Consistency Result: {consistency_result}")
+                
+            #     # 如果不一致，修正答案
+            #     if "INCONSISTENT" in consistency_result.upper():
+            #         import re
+                    
+            #         # 从一致性检查结果中提取正确答案
+            #         corrected_match = re.search(r'The answer should be \[?([A-G])\]?', consistency_result, re.IGNORECASE)
+                    
+            #         if corrected_match:
+            #             corrected_answer = corrected_match.group(1)
+            #             print(f"Detected inconsistency. Correcting answer to: {corrected_answer}")
+                        
+            #             # 替换answer部分
+            #             answer_start = answer.find("<answer>")
+            #             answer_end = answer.find("</answer>") + 9
+                        
+            #             if answer_start != -1 and answer_end != -1:
+            #                 new_answer_section = f"<answer>\n{corrected_answer}\n</answer>"
+            #                 answer = answer[:answer_start] + new_answer_section + answer[answer_end:]
+            #                 print(f"=== Corrected Answer ===")
+            #             else:
+            #                 print("Could not locate <answer> tags for correction")
+            #         else:
+            #             print("Could not extract corrected answer from consistency check")
+            #     else:
+            #         print("=== Answer is consistent ===")
+                
+            #     # print("=========================")
+                
+            #     # 清理GPU内存
+            #     torch.cuda.empty_cache()
 
             print("\n\n=== Final Predicted Answer ===")
             print(answer)

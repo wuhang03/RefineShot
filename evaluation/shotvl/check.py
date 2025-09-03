@@ -73,17 +73,76 @@ Please respond with one of these formats:
             print(f"Answer in <think> section: {think_answer}")
             print(f"Answer in <answer> section: {answer_section}")
             
-            # 可以选择使用think中的答案作为最终答案
-            print(f"Using answer from <think> section: {think_answer}")
+            # 让模型判断哪个答案是正确的
+            judge_prompt = f"""
+Given the original reasoning and two different answers, please determine which answer is correct based on the image and the reasoning provided.
+
+Original reasoning from <think> section:
+{answer[answer.find("<think>"):answer.find("</think>") + 8]}
+
+Two different answers:
+Answer A: {think_answer} (from reasoning conclusion)
+Answer B: {answer_section} (from answer section)
+
+Please analyze the image again and determine which answer (A or B) is correct based on the reasoning and visual evidence.
+
+Respond with only: A or B
+"""
+            
+            # 创建判断的chat (包含图像信息)
+            judge_chat = [
+                {"role": "system", "content": "You are a helpful assistant that determines the correct answer based on reasoning and visual evidence."},
+                {"role": "user", "content": vision_msgs + [{"type": "text", "text": judge_prompt}]},
+            ]
+            
+            judge_text_in = processor.apply_chat_template(
+                judge_chat, tokenize=False, add_generation_prompt=True
+            )
+            judge_img_in, judge_vid_in = process_vision_info(judge_chat)
+            
+            judge_inputs = processor(
+                text=[judge_text_in],
+                images=judge_img_in,
+                videos=judge_vid_in,
+                fps=args.fps,
+                padding=True,
+                return_tensors="pt",
+            ).to(accelerator.device)
+            
+            # 生成判断结果
+            judge_gen = gen_model.generate(
+                **judge_inputs,
+                max_new_tokens=50,
+                do_sample=False,
+            )
+            judge_trimmed = judge_gen[0][judge_inputs.input_ids.shape[-1]:]
+            judge_result = processor.decode(
+                judge_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+            ).strip()
+            
+            print(f"=== Model Judgment ===")
+            print(f"Model choice: {judge_result}")
+            
+            # 根据模型的判断选择正确答案
+            if "A" in judge_result.upper():
+                final_answer = think_answer
+                print(f"Using answer from <think> section: {think_answer}")
+            elif "B" in judge_result.upper():
+                final_answer = answer_section
+                print(f"Using answer from <answer> section: {answer_section}")
+            else:
+                # 如果模型回答不明确，默认使用think中的答案
+                final_answer = think_answer
+                print(f"Model judgment unclear, defaulting to <think> answer: {think_answer}")
             
             # 替换answer部分
             answer_start = answer.find("<answer>")
             answer_end = answer.find("</answer>") + 9
             
             if answer_start != -1 and answer_end != -1:
-                new_answer_section = f"<answer>\n{think_answer}\n</answer>"
+                new_answer_section = f"<answer>\n{final_answer}\n</answer>"
                 answer = answer[:answer_start] + new_answer_section + answer[answer_end:]
-                print(f"=== Answer Corrected ===")
+                print(f"=== Answer Corrected to: {final_answer} ===")
             else:
                 print("Could not locate <answer> tags for correction")
         else:

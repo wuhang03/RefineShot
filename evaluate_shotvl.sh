@@ -24,8 +24,8 @@ echo "Starting evaluation pipeline..."
 mkdir -p "${OUTPUT_DIR}"
 
 echo "Step 1: Running model evaluation with Accelerate"
-accelerate launch --num_processes ${NUM_GPUS} evaluation/shotvl/evaluate_shotvl.py --model ${MODEL_NAME} --reasoning --output-dir ${OUTPUT_DIR} --category "${CATEGORY}" --check_consistency
-# accelerate launch --num_processes ${NUM_GPUS} evaluation/shotvl/evaluate_shotvl.py --model ${MODEL_NAME} --reasoning --output-dir ${OUTPUT_DIR} --category "${CATEGORY}"
+# accelerate launch --num_processes ${NUM_GPUS} evaluation/shotvl/evaluate_shotvl.py --model ${MODEL_NAME} --reasoning --output-dir ${OUTPUT_DIR} --category "${CATEGORY}" --check_consistency
+accelerate launch --num_processes ${NUM_GPUS} evaluation/shotvl/evaluate_shotvl.py --model ${MODEL_NAME} --reasoning --output-dir ${OUTPUT_DIR} --category "${CATEGORY}"
 
 echo "Model evaluation completed. Predictions saved to: ${PREDICTION_PATH}"
 

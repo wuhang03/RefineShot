@@ -35,14 +35,34 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
         "Please select the most likely answer from the options above."
     )
 
-    if row["category"] == "camera movement":
-        prompt += (
-            " The options are types of camera movements. "
-            "Answer based on the CAMERA's motion (not object motion). "
-            "Use the rule: background direction is opposite to camera movement."
-        )
+    # prompt = (
+    #     f"Read the following question carefully: {q}\n{opts_block}\n"
+    #     "Select the answer that most logically fits the question."
+    # )
 
-    # # prompt = (
+    # prompt = (
+    #     f"Question: {q}\n{opts_block}\n"
+    #     "Explain your reasoning and then select the most appropriate answer from the options."
+    # )
+
+    # prompt = (
+    #     f"Question: {q}\n{opts_block}\n"
+    #     "Step 1: Analyze the question.\n"
+    #     "Step 2: Consider each option carefully.\n"
+    #     "Step 3: Reason why each option is right or wrong.\n"
+    #     "Step 4: Conclude with the correct answer."
+    # )
+
+    
+
+    # if row["category"] == "camera movement":
+    #     prompt += (
+    #         " The options are types of camera movements. "
+    #         "Answer based on the CAMERA's motion (not object motion). "
+    #         "Use the rule: background direction is opposite to camera movement."
+    #     )
+
+    # prompt = (
     #     f"Question: {q}\n{opts_block}\n"
     #     "Please answer in the following format, and output each section only ONCE:\n"
     #     "<think>\n"
@@ -139,12 +159,11 @@ def parse_args():
     p.add_argument("--check_consistency", action="store_true", help="Whether to check and correct answer consistency between <think> and <answer>")
     return p.parse_args()
 
-
 def resolve_inconsistency_with_model(answer, think_answer, answer_section, vision_msgs, row, processor, gen_model, args, accelerator):
     """
     当检测到think和answer不一致时，让模型基于图像重新判断哪个答案正确
     """
-    # 构建判断prompt，让模型基于图像选择正确答案
+    # 构建判断prompt，让模型基于图像选择正确答案并提供理由
     judge_prompt = f"""
 Based on the image/video, I need you to determine which answer is correct.
 
@@ -156,14 +175,24 @@ Options: {safe_load(row['options'])}
 
 Please analyze the image/video again and determine which answer ({think_answer} or {answer_section}) is correct based on the visual evidence.
 
-Respond with only the letter of the correct answer (A, B, C, D, etc.).
+Please provide your response in the following format:
+<reasoning>
+[Explain your analysis of the image/video and why you choose one answer over the other]
+</reasoning>
+<final_answer>
+[Only the letter of the correct answer: A, B, C, D, etc.]
+</final_answer>
 """
     
     # 创建判断的chat (包含原始图像/视频)
     judge_chat = [
-        {"role": "system", "content": "You are a helpful assistant that determines the correct answer based on visual evidence."},
+        {"role": "system", "content": "You are a helpful assistant that determines the correct answer based on visual evidence. Always provide both reasoning and a final answer."},
         {"role": "user", "content": vision_msgs + [{"type": "text", "text": judge_prompt}]},
     ]
+
+    print(f"=== Check Prompt ===")
+    print("vision msg: ", vision_msgs)
+    print("judge_prompt: ", judge_prompt)
     
     judge_text_in = processor.apply_chat_template(
         judge_chat, tokenize=False, add_generation_prompt=True
@@ -182,7 +211,7 @@ Respond with only the letter of the correct answer (A, B, C, D, etc.).
     # 生成判断结果
     judge_gen = gen_model.generate(
         **judge_inputs,
-        max_new_tokens=50,
+        max_new_tokens=200,  # 增加token数量以容纳推理过程
         do_sample=False,
     )
     judge_trimmed = judge_gen[0][judge_inputs.input_ids.shape[-1]:]
@@ -190,15 +219,24 @@ Respond with only the letter of the correct answer (A, B, C, D, etc.).
         judge_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
     ).strip()
     
-    print(f"=== Model Judgment ===")
-    print(f"Model selected: {judge_result}")
+    print(f"=== Model Judgment (Full Response) ===")
+    print(f"Model response: {judge_result}")
     
-    # 从判断结果中提取答案
-    # import re
-    judge_match = re.search(r'([A-G])', judge_result.upper())
+    # 提取推理部分和最终答案
+    reasoning_match = re.search(r'<reasoning>(.*?)</reasoning>', judge_result, re.DOTALL | re.IGNORECASE)
+    final_answer_match = re.search(r'<final_answer>\s*([A-G])\s*</final_answer>', judge_result, re.IGNORECASE)
     
-    if judge_match:
-        final_answer = judge_match.group(1)
+    if reasoning_match:
+        reasoning = reasoning_match.group(1).strip()
+        print(f"=== Model Reasoning ===")
+        print(f"Reasoning: {reasoning}")
+    else:
+        print("=== Could not extract reasoning from model response ===")
+    
+    # 从最终答案中提取字母
+    if final_answer_match:
+        final_answer = final_answer_match.group(1).upper()
+        print(f"=== Model Final Decision ===")
         print(f"Final decision: {final_answer}")
         
         # 使用模型选择的答案
@@ -216,8 +254,31 @@ Respond with only the letter of the correct answer (A, B, C, D, etc.).
         else:
             print("Could not locate <answer> tags for correction")
     else:
-        # 如果无法从模型判断中提取答案，默认使用think中的答案
-        print(f"=== Could not parse model judgment, using think answer: {think_answer} ===")
+        # 如果无法从final_answer标签中提取，尝试从整个回复中提取
+        judge_match = re.search(r'([A-G])', judge_result.upper())
+        
+        if judge_match:
+            final_answer = judge_match.group(1)
+            print(f"=== Extracted answer from general response ===")
+            print(f"Final decision: {final_answer}")
+            
+            # 使用模型选择的答案
+            answer_start = answer.find("<answer>")
+            answer_end = answer.find("</answer>") + 9
+            
+            if answer_start != -1 and answer_end != -1:
+                new_answer_section = f"<answer>\n{final_answer}\n</answer>"
+                updated_answer = answer[:answer_start] + new_answer_section + answer[answer_end:]
+                print(f"=== Answer Corrected to: {final_answer} (based on model judgment) ===")
+                
+                # 清理GPU内存
+                torch.cuda.empty_cache()
+                return updated_answer
+            else:
+                print("Could not locate <answer> tags for correction")
+        else:
+            # 如果无法从模型判断中提取答案，默认使用think中的答案
+            print(f"=== Could not parse model judgment, using think answer: {think_answer} ===")
     
     # 回退到使用think中的答案
     answer_start = answer.find("<answer>")
@@ -347,7 +408,7 @@ def main():
             print(answer)
             print("=== End Initial Answer ===\n\n")
             # 一致性检查和修正
-            if "<think>" in answer and "<answer>" in answer and args.check_consistency:
+            if args.check_consistency:
                 
                 def extract_think_answer(text, processor, gen_model, accelerator):
                     """使用模型从文本中提取<think>部分的答案"""
@@ -457,8 +518,26 @@ def main():
                         print("警告：无法从<think>部分提取答案")
                     if not answer_section:
                         print("警告：无法从<answer>部分提取答案")
-                    print("=== Skipping consistency check ===")
-                
+                        
+                        # 如果无法提取answer部分，从think中提取答案并重新构建response
+                        if think_answer:
+                            print(f"从<think>部分提取到答案: {think_answer}，重新构建response")
+                            
+                            # 提取原始的think部分
+                            think_match = re.search(r'<think>(.*?)</think>', answer, re.DOTALL | re.IGNORECASE)
+                            if think_match:
+                                think_content = think_match.group(1)
+                                
+                                # 重新构建完整的response
+                                new_response = f"<think>{think_content}</think>\n<answer>\n{think_answer}\n</answer>"
+                                answer = new_response
+                                print(f"=== 重新构建的response ===")
+                                print(answer)
+                                print("=== 重新构建完成 ===")
+                                
+                                # 重新提取answer_section以便后续处理
+                                answer_section = think_answer
+                                    
                 print("=== End Consistency Check ===\n")
 
 

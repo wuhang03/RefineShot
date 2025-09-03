@@ -4,7 +4,9 @@ import copy as cp
 import pandas as pd
 from tqdm import tqdm
 from openai import OpenAI
-import datetime  
+import datetime
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--prediction_path", required=True)
@@ -12,6 +14,7 @@ parser.add_argument("--openai_key", default=os.getenv("OPENAI_API_KEY"))
 parser.add_argument("--model", default="gpt-4o-2024-08-06")
 parser.add_argument("--temperature", type=float, default=0.0)
 parser.add_argument("--category", default="composition")
+parser.add_argument("--check_consistency", action="store_true")
 args = parser.parse_args()
 PRED_PATH = os.path.abspath(args.prediction_path)
 
@@ -101,7 +104,88 @@ def build_prompt(question, options, prediction):
     )
     return tmpl.format(question, options, prediction)
 
-def eval_row(row, gpt_model):
+def check_answer_consistency(question, options, prediction, model, tokenizer):
+    """
+    使用Qwen3模型检查prediction中<think>和<answer>的一致性
+    """
+    consistency_prompt = f"""
+    Please analyze the following response and extract the answers from both <think> and <answer> sections.
+
+    Question: {question}
+    Options: {options}
+    Response: {prediction}
+
+    Your task:
+    1. Extract the answer concluded in the <think> section:
+    - First, look for explicit statements like "Therefore, the correct answer is X"
+    - If no explicit answer is found, analyze the reasoning content and determine which option it describes or supports based on the context and logic
+    - Match the reasoning with the available options to identify the implied answer
+    2. Extract the answer from the <answer> section
+    3. Return both answers in this exact format:
+
+    THINK_ANSWER: [X]
+    ANSWER_SECTION: [Y]
+
+    Where X is the answer from <think> (either explicit or inferred from reasoning) and Y is the answer from <answer>. If either section doesn't contain a clear answer or cannot be reasonably inferred, use "NONE".
+
+    Please provide only the result in the specified format without any additional explanation or reasoning.
+    """
+
+    try:
+        # 准备模型输入
+        messages = [
+            {"role": "user", "content": consistency_prompt}
+        ]
+        text = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+            enable_thinking=False  # 启用thinking模式
+        )
+        model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+
+        # 生成回复
+        with torch.no_grad():
+            generated_ids = model.generate(
+                **model_inputs,
+                max_new_tokens=1024
+            )
+        
+        output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist()
+        
+        # 解析thinking content
+        try:
+            # rindex finding 151668 (</think>)
+            index = len(output_ids) - output_ids[::-1].index(151668)
+        except ValueError:
+            index = 0
+
+        # thinking_content = tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
+        content = tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+        
+        # print(f"Thinking content: {thinking_content}")
+        print(f"Final content: {content}")
+        
+        # 从content中提取答案
+        think_match = re.search(r'THINK_ANSWER:\s*\[?([A-G]|NONE)\]?', content, re.IGNORECASE)
+        answer_match = re.search(r'ANSWER_SECTION:\s*\[?([A-G]|NONE)\]?', content, re.IGNORECASE)
+        
+        think_answer = think_match.group(1).upper() if think_match and think_match.group(1).upper() != "NONE" else None
+        answer_section = answer_match.group(1).upper() if answer_match and answer_match.group(1).upper() != "NONE" else None
+
+        # print("Think answer: ", think_answer)
+        # print("Answer section: ", answer_section)
+        
+        if think_answer != None and answer_section != None and think_answer == answer_section:
+            return True
+        else:
+            return False
+    
+    except Exception as e:
+        print(f"Error in consistency check: {e}")
+        return True  # 出错时认为一致
+
+def eval_row(row, gpt_model, evaluator, tokenizer):
     choices = build_choices(row)
     opts_str = "\n".join(f"{k}. {v}" for k, v in choices.items())
     cost = 0
@@ -109,29 +193,25 @@ def eval_row(row, gpt_model):
     if pd.isna(row["prediction"]) or str(row["prediction"]).lower() == "nan":
         row["prediction"] = "Z"
 
-    pred_letter = can_infer(row["prediction"], choices)
+    print("prediction: ", row["prediction"])
+    
+    # 检查一致性
+    if args.check_consistency:
+        is_consistent = check_answer_consistency(row["question"], opts_str, row["prediction"], evaluator, tokenizer)
+        if not is_consistent:
+            pred_letter = 'Z'
+        else:
+            pred_letter = can_infer(row["prediction"], choices)
+    else:
+        pred_letter = can_infer(row["prediction"], choices)
 
     print("\n=== Predicted Letter ===")
     print(pred_letter)
     print("=== End ===\n\n")
-    # if not pred_letter and gpt_model:
-    #     prompt = build_prompt(row["question"], opts_str, row["prediction"])
-    #     for _ in range(3):
-    #         ans, cost = openai_generate(prompt, gpt_model, temperature=args.temperature)
-    #         print("ans: ", ans)
-    #         print("cost: ", cost)
-    #         pred_letter = can_infer(ans, choices)
-    #         if pred_letter:
-    #             break
-    #     if not pred_letter:
-    #         pred_letter = random.choice(list(choices) + ["Z"])
-    # else:
-    #     pred_letter = "Z"
 
     if not pred_letter:
         pred_letter = 'Z'
 
-    
     hit = int(pred_letter == row["answer"])
     return hit, pred_letter or "Z", cost
 
@@ -139,20 +219,6 @@ def load_df(path: str) -> pd.DataFrame:
     if path.lower().endswith(".tsv"):
         return pd.read_csv(path, sep="\t")
     return pd.read_excel(path, sheet_name=0)
-
-# def read_input(p: str):
-#     pth = Path(p)
-#     if pth.is_file():
-#         return load_df(str(pth)), str(pth)
-#     elif pth.is_dir():
-#         frames = []
-#         for fn in pth.iterdir():
-#             if fn.suffix.lower() in (".xlsx", ".xls", ".tsv"):
-#                 frames.append(load_df(str(fn)))
-#         if not frames:
-#             raise ValueError("Prediction File Not Found!")
-#         return pd.concat(frames, ignore_index=True), str(pth / "merged_eval.xlsx")
-#     raise FileNotFoundError(p)
 
 def read_input(p: str):
     pth = Path(p)
@@ -171,16 +237,30 @@ def read_input(p: str):
     raise FileNotFoundError(p)
 
 def main():
+    if args.check_consistency:
+        print("Loading Qwen3 model for consistency checking...")
+        model_name = "Qwen/Qwen3-4B"
+        
+        # 加载tokenizer和模型
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        evaluator = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            torch_dtype="auto",
+            device_map="auto"
+        )
+        evaluator.eval()
+
     df, out_path = read_input(PRED_PATH)
     hits, letters = [], []
     total_cost = 0
+    
     for _, row in tqdm(df.iterrows(), total=len(df)):
         if row["category"] != args.category and args.category != "all":
             hit = 0
             letter = 'Z'
             cost = 0
-        else :
-            hit, letter, cost = eval_row(row, args.model)
+        else:
+            hit, letter, cost = eval_row(row, args.model, evaluator, tokenizer)
             
         hits.append(hit)
         letters.append(letter)
@@ -196,7 +276,7 @@ def main():
         "category": ["Overall"],
         "total": [len(df)],
         "correct": [sum(hits)],
-        "accuracy": [round(sum(hits) / len(df), 6)]  # 保留四位小数
+        "accuracy": [round(sum(hits) / len(df), 4)]
     })
     acc_df = pd.concat([grp, overall], ignore_index=True)
     print(acc_df)

@@ -4,9 +4,9 @@ MODEL_NAME="ShotVL-3B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
-CATEGORY="shot size"
+CATEGORY="lighting type"
 
-FILENAME="predictions_1756942496.xlsx"
+FILENAME="predictions_1756954956.xlsx"
 
 # PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}/${FILENAME}"
 

@@ -237,18 +237,18 @@ def read_input(p: str):
     raise FileNotFoundError(p)
 
 def main():
-    if args.check_consistency:
-        print("Loading Qwen3 model for consistency checking...")
-        model_name = "Qwen/Qwen3-4B"
-        
-        # 加载tokenizer和模型
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        evaluator = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            torch_dtype="auto",
-            device_map="auto"
-        )
-        evaluator.eval()
+    # if args.check_consistency:
+    print("Loading Qwen3 model for consistency checking...")
+    model_name = "Qwen/Qwen3-4B"
+    
+    # 加载tokenizer和模型
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    evaluator = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype="auto",
+        device_map="auto"
+    )
+    evaluator.eval()
 
     df, out_path = read_input(PRED_PATH)
     hits, letters = [], []

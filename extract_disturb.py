@@ -3,6 +3,8 @@ import json
 import ast
 import random
 
+random.seed(42)
+
 def get_irrelevant_options():
     """返回一些毫不相关的选项"""
     irrelevant_options = [

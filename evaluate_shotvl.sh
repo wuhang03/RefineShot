@@ -8,7 +8,7 @@ MODEL_NAME="ShotVL-3B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
-CATEGORY="lens size"
+CATEGORY="all"
 
 PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}"
 

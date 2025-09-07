@@ -4,6 +4,8 @@ import ast
 import random
 import sys
 
+random.seed(42)  
+
 def load_category_mapping():
     """加载类别映射JSON文件"""
     try:

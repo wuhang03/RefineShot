@@ -19,7 +19,7 @@ def get_irrelevant_options():
 def extract_correct_options():
     try:
         # 读取TSV文件
-        df = pd.read_csv('test.tsv', sep='\t', encoding='utf-8')
+        df = pd.read_csv('evaluation/data/ShotBench/test.tsv', sep='\t', encoding='utf-8')
         
         # 检查必要的列是否存在
         if 'options' not in df.columns or 'answer' not in df.columns:
@@ -98,7 +98,7 @@ def extract_correct_options():
             print("-" * 60)
         
         # 保存修改后的数据到新文件
-        df_modified.to_csv('test_modified.tsv', sep='\t', index=False, encoding='utf-8')
+        df_modified.to_csv('evaluation/data/ShotBench/test_modified.tsv', sep='\t', index=False, encoding='utf-8')
         print(f"\nModified data saved to 'test_modified.tsv'")
         print(f"Total rows processed: {len(df)}")
     

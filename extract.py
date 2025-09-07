@@ -53,7 +53,7 @@ def create_shuffled_options(items, correct_item):
 def extract_answers_from_tsv():
     try:
         category_mapping = load_category_mapping()
-        df = pd.read_csv('test_origin.tsv', sep='\t', encoding='utf-8')
+        df = pd.read_csv('evaluation/data/ShotBench/test_origin.tsv', sep='\t', encoding='utf-8')
 
         # require 'question' column too since we may modify it for binary cases
         for col in ['answer', 'options', 'category', 'question']:
@@ -164,7 +164,7 @@ def extract_answers_from_tsv():
                 # skipped_count += 1  # Increment skipped counter
 
         df_result = df_new.loc[rows_to_keep]
-        df_result.to_csv('test_replace.tsv', sep='\t', index=False, encoding='utf-8')
+        df_result.to_csv('evaluation/data/ShotBench/test_replace.tsv', sep='\t', index=False, encoding='utf-8')
 
         print(f"\nProcessing complete: {len(df)} rows processed, {len(df_result)} rows saved to test_replace.tsv")
         print(f"  Binary (yes/no) converted: {binary_count}")

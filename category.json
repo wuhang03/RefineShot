@@ -11,11 +11,10 @@
   "lighting type": {
     "all": ["Daylight", "Artificial light", "Mixed light", "Firelight", "Overcast", "Practical light", "Sunny", "Moonlight", "Fluorescent", "HMI", "Tungsten", "LED"],
     "breakdown": {
-      "light_source": ["Daylight", "Artificial light", "Mixed light"],
-      "natural_light": ["Overcast", "Sunny", "Moonlight"],
+      "light_source": ["Daylight", "Moonlight", "Firelight", "Artificial light", "Mixed light"],
+      "daylight_type": ["Overcast", "Sunny"],
       "artificial_light": ["Fluorescent", "HMI", "Tungsten", "LED"],
-      "visible": ["Practical light"],
-      "firelight": ["Firelight"]
+      "visible": ["Practical light"]
     }
   },
   "lighting": {

@@ -173,8 +173,8 @@ def check_answer_consistency(question, options, prediction, model, tokenizer):
         think_answer = think_match.group(1).upper() if think_match and think_match.group(1).upper() != "NONE" else None
         answer_section = answer_match.group(1).upper() if answer_match and answer_match.group(1).upper() != "NONE" else None
 
-        # print("Think answer: ", think_answer)
-        # print("Answer section: ", answer_section)
+        print("Think answer: ", think_answer)
+        print("Answer section: ", answer_section)
         
         if think_answer != None and answer_section != None and think_answer != answer_section:
             print("Inconsistency detected.")

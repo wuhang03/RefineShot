@@ -34,6 +34,7 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
     prompt = (
         f"Question: {q}\n{opts_block}\n"
         "Please select the most likely answer from the options above."
+        "Please output the reasoning process enclosed within <think> </think> tags,  and the final answer within <answer> </answer> tags.\n"
     )
 
     # prompt = (

@@ -35,23 +35,14 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
         "Please select the most likely answer from the options above."
     )
 
-    # prompt = (
-    #     f"Read the following question carefully: {q}\n{opts_block}\n"
-    #     "Select the answer that most logically fits the question."
-    # )
-
-    # prompt = (
-    #     f"Question: {q}\n{opts_block}\n"
-    #     "Explain your reasoning and then select the most appropriate answer from the options."
-    # )
-
-    # prompt = (
-    #     f"Question: {q}\n{opts_block}\n"
-    #     "Step 1: Analyze the question.\n"
-    #     "Step 2: Consider each option carefully.\n"
-    #     "Step 3: Reason why each option is right or wrong.\n"
-    #     "Step 4: Conclude with the correct answer."
-    # )
+    prompt = (
+        f"Question: {q}\n{opts_block}\n"
+        "Please follow the steps below and select the most likely answer from the options above."
+        "Step 1: Analyze the question.\n"
+        "Step 2: Consider each option carefully.\n"
+        "Step 3: Reason why each option is right or wrong.\n"
+        "Step 4: Conclude with the correct answer."
+    )
 
     
 

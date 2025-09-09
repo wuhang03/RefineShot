@@ -176,10 +176,11 @@ def check_answer_consistency(question, options, prediction, model, tokenizer):
         # print("Think answer: ", think_answer)
         # print("Answer section: ", answer_section)
         
-        if think_answer != None and answer_section != None and think_answer == answer_section:
-            return True
-        else:
+        if think_answer != None and answer_section != None and think_answer != answer_section:
+            print("Inconsistency detected.")
             return False
+        else:
+            return True
     
     except Exception as e:
         print(f"Error in consistency check: {e}")

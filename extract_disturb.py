@@ -2,23 +2,24 @@ import pandas as pd
 import json
 import ast
 import random
+import argparse
 
 random.seed(42)
 
-def get_irrelevant_options():
-    """返回一些毫不相关的选项"""
+def get_irrelevant_options(num_irrelevant=3):
+    """返回指定数量的毫不相关的选项"""
     irrelevant_options = [
         "banana", "purple elephant", "quantum physics", "Tuesday morning",
         "chocolate cake", "flying carpet", "ancient civilization", "digital rainbow",
-        "invisible thread", "cosmic dust",
+        "invisible thread", "cosmic dust", "midnight sun", "frozen fire",
         "silent music", "square circle", "liquid stone", "weightless gravity",
         "transparent mirror", "timeless clock", "soundless bell", "motionless dance",
-        "colorless painting", "empty fullness", 
+        "colorless painting", "empty fullness", "dark light", "cold fire",
         "dry water", "soft rock", "bitter sweet", "loud silence"
     ]
-    return random.sample(irrelevant_options, 3)
+    return random.sample(irrelevant_options, min(num_irrelevant, len(irrelevant_options)))
 
-def extract_correct_options():
+def extract_correct_options(num_irrelevant=3):
     try:
         # 读取TSV文件
         df = pd.read_csv('evaluation/data/ShotBench/test.tsv', sep='\t', encoding='utf-8')
@@ -29,6 +30,7 @@ def extract_correct_options():
             return
         
         print(f"Total rows found: {len(df)}")
+        print(f"Adding {num_irrelevant} irrelevant options to each row")
         print("=" * 80)
         
         # 创建新的DataFrame来保存修改后的数据
@@ -62,15 +64,21 @@ def extract_correct_options():
                     # 获取所有原始选项值
                     original_values = list(options_dict.values())
                     
-                    # 添加三个毫不相关的选项
-                    irrelevant_values = get_irrelevant_options()
+                    # 添加指定数量的毫不相关的选项
+                    irrelevant_values = get_irrelevant_options(num_irrelevant)
                     all_values = original_values + irrelevant_values
                     
                     # 随机打乱所有选项
                     random.shuffle(all_values)
                     
-                    # 创建新的选项字典，使用A-G作为键
-                    choice_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+                    # 创建新的选项字典，使用足够的字母作为键
+                    total_options = len(all_values)
+                    choice_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
+                    
+                    if total_options > len(choice_letters):
+                        print(f"Warning: Too many options ({total_options}), truncating to {len(choice_letters)}")
+                        all_values = all_values[:len(choice_letters)]
+                    
                     new_options_dict = {}
                     new_answer_key = None
                     
@@ -99,15 +107,26 @@ def extract_correct_options():
             
             print("-" * 60)
         
+        # 根据不相关选项数量生成文件名
+        output_filename = f'evaluation/data/ShotBench/test_modified_disturb_{num_irrelevant}.tsv'
+        
         # 保存修改后的数据到新文件
-        df_modified.to_csv('evaluation/data/ShotBench/test_modified.tsv', sep='\t', index=False, encoding='utf-8')
-        print(f"\nModified data saved to 'test_modified.tsv'")
+        df_modified.to_csv(output_filename, sep='\t', index=False, encoding='utf-8')
+        print(f"\nModified data saved to '{output_filename}'")
         print(f"Total rows processed: {len(df)}")
+        print(f"Each row now has {len(df.iloc[0]['options'] if len(df) > 0 else [])} options (original + {num_irrelevant} irrelevant)")
     
     except FileNotFoundError:
-        print("Error: test.tsv file not found in current directory")
+        print("Error: evaluation/data/ShotBench/test.tsv file not found")
     except Exception as e:
         print(f"Error reading file: {e}")
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Add irrelevant options to test data')
+    parser.add_argument('--num_irrelevant', type=int, default=3,
+                       help='Number of irrelevant options to add (default: 3)')
+    return parser.parse_args()
+
 if __name__ == "__main__":
-    extract_correct_options()
+    args = parse_args()
+    extract_correct_options(args.num_irrelevant)

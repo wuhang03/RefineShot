@@ -4,11 +4,11 @@
 set -e
 
 # =================== Configuration Variables ===================
-MODEL_NAME="ShotVL-3B"
+MODEL_NAME="ShotVL-7B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
-CATEGORY="all"
+CATEGORY="camera movement"
 
 PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}"
 

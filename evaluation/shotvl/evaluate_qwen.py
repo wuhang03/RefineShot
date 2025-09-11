@@ -54,14 +54,6 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
     #     "If the answers in <think> and <answer> do not match, your response will be considered incorrect."
     # )
 
-    # if row["category"] == "camera movement":
-    #     prompt += (
-    #         " The options are types of camera movements. "
-    #         "Answer based on the CAMERA's motion (not object motion). "
-    #         "Use the rule: background direction is opposite to camera movement."
-    #     )
-
-
     # prompt = (
     #     # ===== 示例 (demonstration) =====
     #     "Here is an example:\n\n"

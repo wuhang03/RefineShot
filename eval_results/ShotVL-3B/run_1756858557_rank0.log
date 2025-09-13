@@ -1,1 +1,0 @@
-2025-09-03 00:15:58,309 - INFO - torchvision:  video_path='file:///home/jovyan/workspace/shot/evaluation/data/ShotBench/video/L85T-a6JUUw.mp4_48.mp4', total_frames=58, video_fps=23.976023976023978, time=0.331s

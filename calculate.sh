@@ -1,12 +1,12 @@
 MODEL_NAME="InternVL3-8B"
-MODEL_NAME="Qwen2.5-VL-3B"
+MODEL_NAME="Qwen2.5-VL-7B"
 # MODEL_NAME="ShotVL-7B"
 NUM_GPUS=1
 OUTPUT_DIR="eval_results"
 
 CATEGORY="all"
 
-FILENAME="perturb_2.xlsx"
+FILENAME="origin.xlsx"
 
 # PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}/${FILENAME}"
 
@@ -15,7 +15,7 @@ PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}/${FILENAME}"
 OPENAI_API_KEY="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" 
 
 echo "Step 2: Calculating scores using OpenAI API"
-OPENAI_API_KEY=${OPENAI_API_KEY} python evaluation/calculate_scores.py --prediction_path ${PREDICTION_PATH} --category "${CATEGORY}" 
+OPENAI_API_KEY=${OPENAI_API_KEY} python evaluation/calculate_scores.py --prediction_path ${PREDICTION_PATH} --category "${CATEGORY}" --check_consistency
 
 echo "Score calculation completed."
 echo "All steps finished successfully."

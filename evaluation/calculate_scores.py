@@ -190,6 +190,7 @@ def eval_row(row, gpt_model, evaluator, tokenizer):
     choices = build_choices(row)
     opts_str = "\n".join(f"{k}. {v}" for k, v in choices.items())
     cost = 0
+    is_consistent = True  # 默认一致
 
     if pd.isna(row["prediction"]) or str(row["prediction"]).lower() == "nan":
         row["prediction"] = "Z"
@@ -214,7 +215,7 @@ def eval_row(row, gpt_model, evaluator, tokenizer):
         pred_letter = 'Z'
 
     hit = int(pred_letter == row["answer"])
-    return hit, pred_letter or "Z", cost
+    return hit, pred_letter or "Z", cost, is_consistent
 
 def load_df(path: str) -> pd.DataFrame:
     if path.lower().endswith(".tsv"):
@@ -254,31 +255,51 @@ def main():
     df, out_path = read_input(PRED_PATH)
     hits, letters = [], []
     total_cost = 0
+    consistency = []
+    
     
     for _, row in tqdm(df.iterrows(), total=len(df)):
         if row["category"] != args.category and args.category != "all":
             hit = 0
             letter = 'Z'
             cost = 0
+            is_consistent = True  # 为跳过的行设置默认值
         else:
-            hit, letter, cost = eval_row(row, args.model, evaluator, tokenizer)
+            hit, letter, cost, is_consistent = eval_row(row, args.model, evaluator, tokenizer)
             
         hits.append(hit)
         letters.append(letter)
         total_cost += cost
+        consistency.append(is_consistent)
 
     print("total_cost:", total_cost)
     df["pred_letter"] = letters
     df["hit"] = hits
+    df["consistency"] = consistency
 
+    # 计算准确率统计
     grp = df.groupby("category")["hit"].agg(total="count", correct="sum").reset_index()
-    grp["accuracy"] = (grp["correct"] / grp["total"]).round(4) 
+    grp["accuracy"] = (grp["correct"] / grp["total"]).round(4)
+    
+    # 单独计算一致性统计
+    consistency_grp = df.groupby("category")["consistency"].agg(
+        consistent_count="sum"
+    ).reset_index()
+    
+    # 合并一致性统计到主统计表
+    grp = grp.merge(consistency_grp, on="category", how="left")
+    grp["consistency_rate"] = (grp["consistent_count"] / grp["total"]).round(4)
+    
+    # 计算整体统计
     overall = pd.DataFrame({
         "category": ["Overall"],
         "total": [len(df)],
         "correct": [sum(hits)],
-        "accuracy": [round(sum(hits) / len(df), 4)]
+        "accuracy": [round(sum(hits) / len(df), 4)],
+        "consistent_count": [sum(consistency)],
+        "consistency_rate": [round(sum(consistency) / len(df), 4)]
     })
+    
     acc_df = pd.concat([grp, overall], ignore_index=True)
     print(acc_df)
     

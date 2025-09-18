@@ -35,23 +35,30 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
         "Please select the most likely answer from the options above."
     )
 
+    prompt = (
+        f"Question: {q}\n{opts_block}\n"
+        "Please select the most likely answer from the options above."
+        "Let's think step by step."
+        "You should output the thinking process in step 1, step 2 and so on."
+    )
 
-    # prompt = (
-    #     f"Question: {q}\n{opts_block}\n"
-    #     "Please answer in the following format, and output each section only ONCE:\n"
-    #     "<think>\n"
-    #     "Step 1: Provide a definition or explanation for each option above.\n"
-    #     "Step 2: Summarize the key differences among the options and describe how to judge between them.\n"
-    #     "Step 3: Analyze the given image based on these differences.\n"
-    #     "Step 4: Select the most likely answer from the options, ensuring it is consistent with the reasoning process.\n"
-    #     "At the end of <think>, clearly state: 'Therefore, the correct answer is X.'\n"
-    #     "</think>\n"
-    #     "<answer>\n"
-    #     "X  # The answer here must exactly match the option stated in <think>.\n"
-    #     "</answer>\n"
-    #     "Do not output more than one <think> or <answer> block for this question. "
-    #     "If the answers in <think> and <answer> do not match, your response will be considered incorrect."
-    # )
+
+    prompt = (
+        f"Question: {q}\n{opts_block}\n"
+        "Please answer in the following format, and output each section only ONCE:\n"
+        "<think>\n"
+        "Step 1: Provide a definition or explanation for each option above.\n"
+        "Step 2: Summarize the key differences among the options and describe how to judge between them.\n"
+        "Step 3: Analyze the given image based on these differences.\n"
+        "Step 4: Select the most likely answer from the options, ensuring it is consistent with the reasoning process.\n"
+        "At the end of <think>, clearly state: 'Therefore, the correct answer is X.'\n"
+        "</think>\n"
+        "<answer>\n"
+        "X  # The answer here must exactly match the option stated in <think>.\n"
+        "</answer>\n"
+        "Do not output more than one <think> or <answer> block for this question. "
+        "If the answers in <think> and <answer> do not match, your response will be considered incorrect."
+    )
 
     
 

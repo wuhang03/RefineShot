@@ -8,7 +8,7 @@ import os
 
 # --- 步骤 1: 加载 Excel 文件 (来自您提供的代码) ---
 # 您的 Excel 文件名
-file_path = 'ShotVL-7B/origin_results.xlsx'
+file_path = 'Qwen2.5-VL-7B/ori_results.xlsx'
 # Excel 文件中包含数据的工作表名称
 sheet_name = 'Results'
 
@@ -160,22 +160,35 @@ def plot_confusion_matrix_from_long_format(df, category_name, category_labels_da
     cm_percent = cm.astype('float') / (cm_sum + 1e-8) * 100
 
     # 7. 绘图
-    plt.figure(figsize=(12, 10))  # 增大图形尺寸以适应更多标签
-    sns.heatmap(cm_percent, annot=True, fmt='.1f', cmap='Blues',
-                xticklabels=filtered_class_labels, yticklabels=filtered_class_labels,
-                cbar_kws={'label': 'Prediction Accuracy (%)'})
-
-    plt.title(f'Confusion Matrix: {category_name.title()} (%) - {len(y_true_final)} samples', fontsize=16)
-    plt.ylabel('True Label', fontsize=12)
-    plt.xlabel('Predicted Label', fontsize=12)
-    plt.xticks(rotation=45, ha='right')
-    plt.yticks(rotation=0)
+    plt.figure(figsize=(14, 12))  # 进一步增大图形尺寸
+    # 设置更大的字体参数和统一字体
+    font_kwargs = {'fontsize': 24, 'fontname': 'Times New Roman'}
+    sns.heatmap(
+        cm_percent, 
+        annot=True, 
+        fmt='.1f', 
+        cmap='Blues',
+        xticklabels=filtered_class_labels, 
+        yticklabels=filtered_class_labels,
+        cbar_kws={'label': 'Prediction Accuracy (%)'},
+        annot_kws={'size': 22, 'fontname': 'Times New Roman'}
+    )
+    plt.title(f'Confusion Matrix: {category_name.title()} (%) - {len(y_true_final)} samples', **font_kwargs)
+    plt.ylabel('True Label', **font_kwargs)
+    plt.xlabel('Predicted Label', **font_kwargs)
+    plt.xticks(rotation=45, ha='right', fontsize=20, fontname='Times New Roman')
+    plt.yticks(rotation=0, fontsize=20, fontname='Times New Roman')
     plt.tight_layout()
     
-    # 保存图片
+    # 保存图片为pdf
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"图表已保存到: {save_path}")
+        # 获取file_path中/之前的第一部分作为前缀
+        rel_path = os.path.relpath(file_path, os.path.dirname(__file__))
+        prefix = rel_path.split(os.sep)[0] if os.sep in rel_path else rel_path.split('/')[0]
+        base_filename = os.path.splitext(os.path.basename(save_path))[0]
+        save_path_pdf = os.path.join(os.path.dirname(save_path), f"{prefix}_{base_filename}.pdf")
+        plt.savefig(save_path_pdf, dpi=300, bbox_inches='tight', format='pdf')
+        print(f"图表已保存到: {save_path_pdf}")
     
     plt.show()
     plt.close()  # 关闭图形以释放内存

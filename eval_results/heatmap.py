@@ -161,8 +161,8 @@ def plot_confusion_matrix_from_long_format(df, category_name, category_labels_da
 
     # 7. 绘图
     plt.figure(figsize=(14, 12))  # 进一步增大图形尺寸
-    # 设置更大的字体参数和统一字体
-    font_kwargs = {'fontsize': 24, 'fontname': 'Times New Roman'}
+    # 设置更大的字体参数，使用默认字体
+    font_kwargs = {'fontsize': 24}
     sns.heatmap(
         cm_percent, 
         annot=True, 
@@ -171,13 +171,13 @@ def plot_confusion_matrix_from_long_format(df, category_name, category_labels_da
         xticklabels=filtered_class_labels, 
         yticklabels=filtered_class_labels,
         cbar_kws={'label': 'Prediction Accuracy (%)'},
-        annot_kws={'size': 22, 'fontname': 'Times New Roman'}
+        annot_kws={'size': 22}
     )
     plt.title(f'Confusion Matrix: {category_name.title()} (%) - {len(y_true_final)} samples', **font_kwargs)
     plt.ylabel('True Label', **font_kwargs)
     plt.xlabel('Predicted Label', **font_kwargs)
-    plt.xticks(rotation=45, ha='right', fontsize=20, fontname='Times New Roman')
-    plt.yticks(rotation=0, fontsize=20, fontname='Times New Roman')
+    plt.xticks(rotation=45, ha='right', fontsize=20)
+    plt.yticks(rotation=0, fontsize=20)
     plt.tight_layout()
     
     # 保存图片为pdf

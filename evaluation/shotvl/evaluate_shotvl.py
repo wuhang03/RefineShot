@@ -35,12 +35,12 @@ def build_prompt(row: pd.Series, root_dir: Path, default_fps: float):
         "Please select the most likely answer from the options above."
     )
 
-    prompt = (
-        f"Question: {q}\n{opts_block}\n"
-        "Please select the most likely answer from the options above."
-        "Let's think step by step."
-        "You should output the thinking process in step 1, step 2 and so on."
-    )
+    # prompt = (
+    #     f"Question: {q}\n{opts_block}\n"
+    #     "Please select the most likely answer from the options above."
+    #     "Let's think step by step."
+    #     "You should output the thinking process in step 1, step 2 and so on."
+    # )
 
 
     prompt = (

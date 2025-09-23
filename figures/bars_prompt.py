@@ -35,7 +35,7 @@ x = np.arange(len(model_list))
 bar_width = 0.18
 prompt_offsets = {'Direct': -bar_width, 'Reasoning': 0, 'Step-by-step': bar_width}
 
-fig, axes = plt.subplots(1, 2, figsize=(32, 10))
+fig, axes = plt.subplots(1, 2, figsize=(32, 6))  # 降低高度
 ax = axes[0]
 
 custom_hatches = {'Direct': '/', 'Reasoning': '\\', 'Step-by-step': 'x'}
@@ -67,7 +67,7 @@ ax.legend(fontsize=22, title='Prompt', title_fontsize=22)
 # ax.set_title('Bar Chart', fontsize=32, pad=20)
 
 # 保存柱状图为独立文件
-fig_bar, ax_bar = plt.subplots(figsize=(16, 10))
+fig_bar, ax_bar = plt.subplots(figsize=(16, 6))  # 降低高度
 for j, prompt in enumerate(['Direct', 'Reasoning', 'Step-by-step']):
     bar_vals = []
     for i, model in enumerate(model_list):
@@ -126,7 +126,7 @@ ax2.set_ylabel('Performance (Overall)', fontsize=32, labelpad=10, fontweight='bo
 ax2.tick_params(axis='y', labelsize=22)
 for label in ax2.get_yticklabels():
     label.set_fontweight('bold')
-ax2.set_ylim(0, 80)
+ax2.set_ylim(20, 80)  # 散点图y轴从20开始
 ax2.grid(True, linestyle='--', color='gray', alpha=0.5)
 # 去掉标题
 # ax2.set_title('Scatter Chart', fontsize=32, pad=20)
@@ -139,7 +139,7 @@ legend_elements = [
 ax2.legend(handles=legend_elements, fontsize=18, loc='upper left', title='Prompt', title_fontsize=18)
 
 # 保存散点图为独立文件
-fig_dot, ax_dot = plt.subplots(figsize=(16, 10))
+fig_dot, ax_dot = plt.subplots(figsize=(16, 6))  # 降低高度
 for i, model in enumerate(model_list):
     for j, prompt in enumerate(['Direct', 'Reasoning', 'Step-by-step']):
         idx = i * 3 + j
@@ -169,7 +169,7 @@ ax_dot.set_ylabel('Performance (Overall)', fontsize=32, labelpad=10, fontweight=
 ax_dot.tick_params(axis='y', labelsize=22)
 for label in ax_dot.get_yticklabels():
     label.set_fontweight('bold')
-ax_dot.set_ylim(0, 80)
+ax_dot.set_ylim(20, 80)  # 独立散点图y轴从20开始
 ax_dot.grid(True, linestyle='--', color='gray', alpha=0.5)
 # 去掉标题
 # ax_dot.set_title('Scatter Chart', fontsize=32, pad=20)

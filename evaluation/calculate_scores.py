@@ -15,6 +15,7 @@ parser.add_argument("--model", default="gpt-4o-2024-08-06")
 parser.add_argument("--temperature", type=float, default=0.0)
 parser.add_argument("--category", default="composition")
 parser.add_argument("--check_consistency", action="store_true")
+parser.add_argument("--check_adherence", action="store_true")
 args = parser.parse_args()
 PRED_PATH = os.path.abspath(args.prediction_path)
 
@@ -103,6 +104,69 @@ def build_prompt(question, options, prediction):
         "Example 4:\nQuestion: {}?\nOptions: {}\n(Z) Failed\nAnswer: {}\nYour output: "
     )
     return tmpl.format(question, options, prediction)
+
+def check_instruction_adherence(question, options, prediction, model, tokenizer):
+    """
+    使用Qwen3模型检查prediction是否遵循了prompt的所有步骤和格式要求
+    """
+    adherence_prompt = f"""
+    Please analyze the following response and determine whether it strictly follows ALL the required steps and format as specified in the prompt.
+
+    Prompt requirements:
+    1. <think> block must include:
+       - Step 1: Provide a definition or explanation for each option above.
+       - Step 2: Summarize the key differences among the options and describe how to judge between them.
+       - Step 3: Analyze the given image based on these differences.
+       - Step 4: Select the most likely answer from the options, ensuring it is consistent with the reasoning process.
+       - At the end of <think>, clearly state: 'Therefore, the correct answer is X.'
+    2. <answer> block must contain:
+       - X  # The answer here must exactly match the option stated in <think>.
+    3. There must be only ONE <think> and ONE <answer> block in the response.
+    4. If the answers in <think> and <answer> do not match, the response is considered incorrect.
+
+    Question: {question}
+    Options: {options}
+    Response: {prediction}
+
+    Your task:
+    - Check if all the above requirements are met in the response.
+    - If ALL requirements are met, output: INSTRUCTION_ADHERENCE: [YES]
+    - If ANY requirement is not met, output: INSTRUCTION_ADHERENCE: [NO]
+    - Do not provide any explanation or extra text, only output the result in the specified format.
+    """
+
+    try:
+        messages = [
+            {"role": "user", "content": adherence_prompt}
+        ]
+        text = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+            enable_thinking=False
+        )
+        model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+
+        with torch.no_grad():
+            generated_ids = model.generate(
+                **model_inputs,
+                max_new_tokens=512
+            )
+        output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist()
+        content = tokenizer.decode(output_ids, skip_special_tokens=True).strip("\n")
+        print(f"Instruction adherence check content: {content}")
+
+        match = re.search(r'INSTRUCTION_ADHERENCE:\s*\[?(YES|NO)\]?', content, re.IGNORECASE)
+        if match:
+            result = match.group(1).upper()
+            return result == "YES"
+        else:
+            return False
+    except Exception as e:
+        print(f"Error in instruction adherence check: {e}")
+        return False
+
+
 
 def check_answer_consistency(question, options, prediction, model, tokenizer):
     """
@@ -206,6 +270,11 @@ def eval_row(row, gpt_model, evaluator, tokenizer):
             pred_letter = can_infer(row["prediction"], choices)
     else:
         pred_letter = can_infer(row["prediction"], choices)
+
+    if args.check_adherence:
+        adheres = check_instruction_adherence(row["question"], opts_str, row["prediction"], evaluator, tokenizer)
+        if not adheres:
+            pred_letter = 'Z'
 
     print("\n=== Predicted Letter ===")
     print(pred_letter)

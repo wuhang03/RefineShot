@@ -50,8 +50,8 @@ for j, prompt in enumerate(['Direct', 'Reasoning', 'Step-by-step']):
     # 数值标注
     for i, val in enumerate(bar_vals):
         if overall[i*3 + j] is not None:
-        ax.text(x[i] + prompt_offsets[prompt], val + 1.2, f'{val:.1f}',
-            fontsize=22, ha='center', va='bottom')
+            ax.text(x[i] + prompt_offsets[prompt], val + 1.2, f'{val:.1f}',
+                fontsize=22, ha='center', va='bottom')
 
 ax.set_xticks(x)
 ax.set_xticklabels(model_list, fontsize=28)

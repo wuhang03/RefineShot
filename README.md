@@ -17,7 +17,7 @@
     <span class="author-block">
       <a href="https://faculty.ucmerced.edu/mhyang/" target="_blank">Ming-Hsuan Yang</a><sup>1</sup>,</span>
     <span class="author-block">
-      <a href="https://wangywust.github.io/" target="_blank">Yiwei Wang </a><sup>1†</sup>,</span>
+      <a href="https://wangywust.github.io/" target="_blank">Yiwei Wang</a><sup>1†</sup>,</span>
   </div>
 
   <div class="is-size-5 publication-authors" style="font-size: 18px;">
@@ -127,8 +127,7 @@ weaker reasoning faithfulness.
     <img src="images/consistency.png" alt="teaser" width="70%">
 </div>
 
-- Performance of different models on the refined benchmark under **reasoning and step-by-
-step prompts.** Qwen remains stable across prompts, while ShotVL shows clear performance drops
+- Performance of different models on the refined benchmark under **reasoning and step-by-step prompts.** Qwen remains stable across prompts, while ShotVL shows clear performance drops
 and higher time cost. Time cost is reported in hours:minutes (hh:mm) format.
 
 

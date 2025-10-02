@@ -12,7 +12,7 @@ CATEGORY="all"
 
 PREDICTION_PATH="${OUTPUT_DIR}/${MODEL_NAME}"
 
-OPENAI_API_KEY="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"  # Replace with your actual key or use environment variable
+OPENAI_API_KEY=""  # Replace with your actual key or use environment variable
 # ==============================================================
 
 echo "Starting evaluation pipeline..."

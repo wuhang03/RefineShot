@@ -30,11 +30,11 @@
 </div>
 
 
-<!-- <div style='display: flex; gap: 0.25rem; justify-content: center; text-align: center;' align="center">
-  <a href='https://arxiv.org/abs/2507.00008'><img src='https://img.shields.io/badge/Paper-arxiv-red'></a>
-  <a href='https://www.techrxiv.org/users/933923/articles/1304524-dimo-gui-advancing-test-time-scaling-in-gui-grounding-via-modality-aware-visual-reasoning'><img src='https://img.shields.io/badge/Paper-TechRxiv-blue'></a>
-  <a href='https://wuhang03.github.io/DiMo-GUI-homepage/'><img src='https://img.shields.io/badge/Homepage-DiMo-green'></a>
-</div> -->
+<div style='display: flex; gap: 0.25rem; justify-content: center; text-align: center;' align="center">
+  <a href='https://www.arxiv.org/abs/2510.02423'><img src='https://img.shields.io/badge/Paper-arxiv-red'></a>
+  <!-- <a href='https://www.techrxiv.org/users/933923/articles/1304524-dimo-gui-advancing-test-time-scaling-in-gui-grounding-via-modality-aware-visual-reasoning'><img src='https://img.shields.io/badge/Paper-TechRxiv-blue'></a> -->
+  <!-- <a href='https://wuhang03.github.io/DiMo-GUI-homepage/'><img src='https://img.shields.io/badge/Homepage-DiMo-green'></a> -->
+</div>
 
 ## 🔥 Update
 <!-- * [2024-04-05]: ⭐️⭐️⭐️ VCD is selected as Poster Highlight in CVPR 2024! (Top 11.9% in accepted papers)
@@ -148,6 +148,12 @@ ShotVL, whose results are notably weaker, particularly in instruction adherence.
 ## 📑 Citation
 If you find our project useful, we hope you can star our repo and cite our paper as follows:
 ```
+@article{wu2025refineshot,
+  title={RefineShot: Rethinking Cinematography Understanding with Foundational Skill Evaluation},
+  author={Wu, Hang and Cai, Yujun and Ge, Haonan and Chen, Hongkai and Yang, Ming-Hsuan and Wang, Yiwei},
+  journal={arXiv preprint arXiv:2510.02423},
+  year={2025}
+}
 
 ```
 
